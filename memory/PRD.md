@@ -1,104 +1,196 @@
 # JGoode's AIO PC Tool v2 - PRD
 
 ## Problem Statement
-Rebuild original Electron-based AIO PC Tool as a professional WPF .NET 8 Windows desktop application with a stunning Red + Black theme, excluding all debloat tweaks, with focus on safety, proper revert behavior, and professional customizable UX.
+Rebuild original Electron-based AIO PC Tool as a professional WPF .NET 8 Windows desktop application with a stunning Red + Black theme, featuring a Cortex-like advanced system cleaner, comprehensive safe tweaks, and professional UI across all features.
 
 ## Architecture
 - **Framework**: WPF (.NET 8 LTS)
 - **Pattern**: MVVM with CommunityToolkit.Mvvm
-- **UI**: Custom themed styles (Red/Black default, multiple accent colors, light/dark mode support)
+- **UI**: Custom themed styles (Red/Black default, multiple accent colors)
 - **Hardware**: LibreHardwareMonitorLib
-
-## Core Requirements
-1. ✅ Professional WPF desktop app with custom theme system
-2. ✅ Removed ALL debloat tweaks as requested
-3. ✅ Removed "Disable Background Apps (Legacy)" tweak
-4. ✅ 53 safe Windows 11 tweaks with PROPER revert to Windows defaults
-5. ✅ Real-time auto-detection system
-6. ✅ OPTIMIZED/DEFAULT status badges
-7. ✅ Hardware monitoring (CPU, GPU, RAM, Disk)
-8. ✅ System cleaner with 15 categories
-9. ✅ DNS manager with 8 providers
-10. ✅ Restore points management
-11. ✅ Chris Titus Tech utility integration (admin PowerShell)
-12. ✅ 24 utilities organized by category
+- **Dependencies**: Microsoft.Extensions.DependencyInjection
 
 ## What's Implemented (Dec 2025)
 
-### Theme System (NEW - Completed)
-- **Default Theme**: Red accent on Black background
-- **Dark Mode Colors**: True black (#0A0A0C) backgrounds
-- **Light Mode Colors**: Clean white backgrounds with accent colors
-- **9 Accent Colors**: Red (default), Blue, Purple, Pink, Teal, Green, Orange, Gold, Cyan
-- **Theme Manager**: Runtime theme switching via Settings page
-- **DynamicResource**: All UI elements update instantly when theme changes
+### Advanced System Cleaner (Cortex-style) ✅ NEW
+**25+ Cleaning Categories:**
 
-### Tweaks (53 total) - SAFETY AUDITED ✅
-- Privacy: 10 tweaks
-- Performance: 12 tweaks  
-- Gaming: 12 tweaks
-- System: 8 tweaks
-- Network: 5 tweaks
-- Services: 6 tweaks
+**Gaming:**
+- DirectX Shader Cache
+- NVIDIA Cache (DXCache, GLCache, ComputeCache)
+- AMD Cache (DxCache, DxcCache, GLCache, VkCache)
+- Intel Graphics Shader Cache
+- Steam Cache & Logs
+- Epic Games Cache
+- EA App Cache
+- Ubisoft Connect Cache
+- GOG Galaxy Cache
 
-### Safety Features - VERIFIED ✅
-- ✅ NO registry key deletion - all reverts set explicit Windows default values
-- ✅ Audited all 53 tweaks for correct default values
-- ✅ Fixed 3 tweaks with incorrect/duplicate revert scripts:
-  - SSD TRIM (Enable only - no safe reason to disable)
-  - RSS (Enable only - always should be on)
-  - Remote Registry (stays disabled - security best practice)
-- ✅ Real-time detection after every apply/revert
-- ✅ Event-driven UI updates
-- ✅ Clear status badges (OPTIMIZED/DEFAULT)
-- ✅ Warning labels for special cases
+**System:**
+- Windows Temp Files (System + User)
+- Windows Update Cache & Logs
+- Windows Logs (CBS, DISM, WER)
+- Prefetch Data
+- Thumbnail Cache (thumbcache, iconcache)
+- Recycle Bin
 
-### Chris Titus Tech Utility
-- Featured prominently in Utilities page
-- Launches: `iwr -useb https://christitus.com/win | iex` in admin PowerShell
+**Browser:**
+- Chrome Cache (Cache, Code Cache, GPUCache, ShaderCache)
+- Edge Cache
+- Firefox Cache
+- Opera GX Cache
+- Brave Browser Cache
+
+**Apps:**
+- Discord Cache
+- Spotify Cache
+- VS Code Cache
+
+**Features:**
+- Scan all with size breakdown per category
+- Select/Deselect All functionality
+- Category grouping with icons
+- SAFE badges on all categories
+- File count per category
+- Last cleaned timestamp
+
+### System Tweaks (35+ Safe Tweaks) ✅ ENHANCED
+**Gaming (9 tweaks):**
+- Enable Game Mode
+- Disable Xbox Game Bar
+- Disable Background Recording (Game DVR)
+- Hardware-Accelerated GPU Scheduling
+- Disable Fullscreen Optimizations
+- Boost Game Process Priority
+- Maximum GPU Priority for Games
+- High-Performance Scheduling Category
+- High-Priority SFIO for Games
+
+**Performance (8 tweaks):**
+- Disable SysMain (Superfetch)
+- Disable Prefetch
+- Disable Hibernation
+- Disable Fast Startup
+- Optimize CPU Scheduling
+- Disable Transparency Effects
+- Reduce Visual Animations
+- Maximize System Responsiveness
+
+**Privacy (7 tweaks):**
+- Disable Telemetry
+- Disable Advertising ID
+- Disable Activity History
+- Disable Feedback Requests
+- Disable App Suggestions
+- Disable Tailored Experiences
+- Disable Location Tracking
+
+**Network (3 tweaks):**
+- Disable Nagle's Algorithm
+- Disable Network Throttling
+- Enable Large MTU Packets
+
+**Visual (3 tweaks):**
+- Show File Extensions
+- Show Hidden Files
+- Classic Context Menu (Win11)
+
+**Power (3 tweaks):**
+- Disable USB Selective Suspend
+- Disable Power Throttling
+- Disable CPU Core Parking
+
+**Security (2 tweaks):**
+- Disable AutoRun
+- Disable Remote Assistance
+
+**Storage (3 tweaks):**
+- Disable Storage Sense
+- Optimize NTFS Performance
+- Disable 8.3 Filename Creation
+
+**Features:**
+- Instant status detection (OPTIMIZED/DEFAULT badges)
+- Category filtering with colored badges
+- Grouped display when viewing "All"
+- Apply/Revert All in Category
+- Warning labels for advanced tweaks
+- Windows version indicators
+
+### Professional UI ✅ ENHANCED
+- Consistent design language across all pages
+- Modern card-based layouts
+- Category headers with icons and accent colors
+- Hover effects on all interactive elements
+- Stats counters in headers
+- Empty state designs
+- Confirmation dialogs for destructive actions
+
+### All Pages Updated:
+1. **Dashboard**: Hardware monitoring, quick access, active tweaks count
+2. **Cleaner**: Full Cortex-style redesign with 25+ categories
+3. **Tweaks**: Category filtering, grouped display, Apply/Revert All
+4. **Utilities**: Featured CTT card, categorized utilities
+5. **DNS Manager**: Selection highlighting, 6 providers
+6. **Restore Points**: Empty state, card design, refresh
+7. **Settings**: Stats grid, accent color picker
 
 ### Build System
 - BUILD.bat one-click Windows build script
-- build.sh for PowerShell/WSL
 - Single executable publish with self-contained .NET 8
+- Admin manifest for registry access
 
 ## Project Structure
 ```
 /app/AIO_PC_Tool_v2/
-├── App.xaml / App.xaml.cs          # Entry point, DI setup
+├── App.xaml / App.xaml.cs          # Entry point, DI setup, error handling
 ├── Helpers/
 │   ├── Converters.cs               # XAML value converters
-│   └── ThemeManager.cs             # Runtime theme switching (NEW)
-├── Models/Tweak.cs                 # Data models
+│   └── ThemeManager.cs             # Runtime theme switching
+├── Models/Tweak.cs                 # Data models (Tweak, CleanerCategory, etc.)
 ├── Services/
-│   ├── TweakService.cs             # 53 safe tweaks (AUDITED)
-│   ├── CleanerService.cs
-│   ├── HardwareMonitorService.cs
-│   ├── OtherServices.cs
-│   └── UtilitiesService.cs
+│   ├── TweakService.cs             # 35+ safe tweaks
+│   ├── CleanerService.cs           # 25+ cleaning categories
+│   ├── HardwareMonitorService.cs   # Real-time hardware monitoring
+│   ├── OtherServices.cs            # DNS, RestorePoint services
+│   └── UtilitiesService.cs         # System utilities
 ├── Styles/
 │   ├── ThemeColors.xaml            # Color definitions (Red+Black default)
-│   └── CustomStyles.xaml           # UI component styles
+│   └── CustomStyles.xaml           # Button & UI styles
 ├── ViewModels/ViewModels.cs        # MVVM view models
 ├── Views/
-│   ├── MainWindow.xaml             # Main shell (updated for themes)
-│   ├── DashboardPage.xaml          # Dashboard (updated for themes)
-│   ├── TweaksPage.xaml             # Tweaks (updated for themes)
-│   ├── SettingsPage.xaml           # Settings with theme picker (NEW)
-│   └── [other pages]
+│   ├── MainWindow.xaml/.cs         # Main shell with navigation
+│   ├── DashboardPage.xaml/.cs      # Hardware monitoring dashboard
+│   ├── CleanerPage.xaml/.cs        # Advanced cleaner (Cortex-style)
+│   ├── TweaksPage.xaml/.cs         # System tweaks with categories
+│   ├── UtilitiesPage.xaml/.cs      # System utilities
+│   ├── DnsPage.xaml/.cs            # DNS manager
+│   ├── RestorePointsPage.xaml/.cs  # System restore
+│   └── SettingsPage.xaml/.cs       # App settings
 └── BUILD.bat                       # Windows build script
 ```
 
-## Next Steps for User
-1. **Build on Windows**: Clone to Windows machine, run `BUILD.bat`
-2. **Test Theme System**: Go to Settings, try different accent colors and light/dark toggle
-3. **Test Tweaks**: Apply/revert several tweaks, verify detection works instantly
-4. **Push to GitHub**: After testing, push to https://github.com/JaidenGoode/AIO_PC_Tool_v2.git
+## Testing Instructions
+1. Clone/pull repository to Windows machine
+2. Run `BUILD.bat` as Administrator
+3. Test each feature:
+   - Dashboard: Verify hardware monitoring works
+   - Cleaner: Scan -> review categories -> Clean selected
+   - Tweaks: Apply/revert tweaks, check instant detection
+   - DNS: Select provider, apply
+   - Utilities: Run CTT, run repair utilities
+   - Restore: Create restore point
+   - Settings: Change accent color
+
+## Known Requirements
+- Run as Administrator for registry tweaks
+- Windows 10/11
+- .NET 8 Runtime (self-contained in build)
 
 ## Future Enhancements (Backlog)
 - P1: System tray icon with minimize to tray
 - P1: Auto-update functionality
 - P2: Export/import tweak profiles
 - P2: Scheduled cleaning
-- P2: More Windows 11 24H2 specific tweaks
 - P2: Custom tweak editor
+- P2: More Windows 11 24H2 specific tweaks
