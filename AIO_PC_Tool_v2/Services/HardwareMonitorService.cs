@@ -1,3 +1,4 @@
+using System.IO;
 using AIO_PC_Tool_v2.Models;
 using LibreHardwareMonitor.Hardware;
 
@@ -64,13 +65,7 @@ namespace AIO_PC_Tool_v2.Services
                         break;
 
                     case HardwareType.Storage:
-                        foreach (var sensor in hardware.Sensors)
-                        {
-                            if (sensor.SensorType == SensorType.Load && sensor.Name == "Used Space")
-                            {
-                                info.Disk.UsagePercent = sensor.Value ?? 0;
-                            }
-                        }
+                        // UsagePercent is calculated from UsedGb/TotalGb
                         break;
                 }
             }
