@@ -1,0 +1,86 @@
+<Page x:Class="AIO_PC_Tool_v2.Views.DnsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      xmlns:vm="clr-namespace:AIO_PC_Tool_v2.ViewModels"
+      Title="DNS Manager" Background="Transparent">
+    
+    <Page.DataContext>
+        <vm:DnsViewModel/>
+    </Page.DataContext>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="DNS Manager" FontSize="28" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+            <TextBlock Text="Change your DNS servers for faster and more private browsing" FontSize="14" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0"/>
+        </StackPanel>
+        
+        <!-- DNS Providers -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Providers}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="3"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{StaticResource BackgroundCard}" CornerRadius="12" Padding="20" Margin="0,0,12,12" Cursor="Hand"
+                                BorderBrush="{Binding IsActive, Converter={StaticResource BoolToAccentConverter}}" BorderThickness="2">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                                    <Border Background="{StaticResource AccentPrimary}" CornerRadius="8" Padding="10" Opacity="0.2"/>
+                                    <materialDesign:PackIcon Kind="Dns" Width="24" Height="24" Foreground="{StaticResource AccentPrimary}" Margin="-34,0,0,0"/>
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                                </StackPanel>
+                                
+                                <TextBlock Grid.Row="1" Text="{Binding Description}" FontSize="13" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                                
+                                <StackPanel Grid.Row="2">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="Primary:" FontSize="12" Foreground="{StaticResource TextSecondary}" Width="60"/>
+                                        <TextBlock Text="{Binding PrimaryDns}" FontSize="12" Foreground="{StaticResource TextPrimary}" FontFamily="Consolas"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Secondary:" FontSize="12" Foreground="{StaticResource TextSecondary}" Width="60"/>
+                                        <TextBlock Text="{Binding SecondaryDns}" FontSize="12" Foreground="{StaticResource TextPrimary}" FontFamily="Consolas"/>
+                                    </StackPanel>
+                                    
+                                    <Button Content="{Binding IsActive, Converter={StaticResource BoolToAppliedConverter}}" 
+                                            Command="{Binding DataContext.SetDnsCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                            CommandParameter="{Binding Id}"
+                                            Style="{StaticResource MaterialDesignFlatMidBgButton}"
+                                            Background="{Binding IsActive, Converter={StaticResource BoolToSuccessConverter}}"
+                                            Foreground="White"
+                                            Margin="0,16,0,0"
+                                            HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="{StaticResource BackgroundCard}" CornerRadius="8" Padding="12" Margin="0,16,0,0">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="Information" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding StatusMessage}" FontSize="13" Foreground="{StaticResource TextSecondary}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>
