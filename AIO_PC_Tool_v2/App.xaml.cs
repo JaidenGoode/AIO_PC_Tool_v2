@@ -11,11 +11,25 @@ namespace AIO_PC_Tool_v2
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
+            // Show any unhandled exceptions
+            DispatcherUnhandledException += (s, args) =>
+            {
+                MessageBox.Show($"Error: {args.Exception.Message}\n\n{args.Exception.StackTrace}", "Crash", MessageBoxButton.OK, MessageBoxImage.Error);
+                args.Handled = true;
+            };
 
-            var services = new ServiceCollection();
-            ConfigureServices(services);
-            ServiceProvider = services.BuildServiceProvider();
+            try
+            {
+                base.OnStartup(e);
+
+                var services = new ServiceCollection();
+                ConfigureServices(services);
+                ServiceProvider = services.BuildServiceProvider();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Startup Error: {ex.Message}\n\n{ex.StackTrace}", "Startup Crash", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ConfigureServices(IServiceCollection services)
