@@ -6,21 +6,21 @@ namespace AIO_PC_Tool_v2.Services
 {
     public class CleanerService
     {
-        public ObservableCollection<CleanerCategory> GetCategories()
+        private List<CleanerCategory> GetAllPossibleCategories()
         {
             var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var programData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
 
-            return new ObservableCollection<CleanerCategory>
+            return new List<CleanerCategory>
             {
                 // System Cache
                 new CleanerCategory
                 {
                     Name = "Windows Temp Files",
                     Description = "System and user temporary files",
-                    Icon = "Temp",
+                    Icon = "🗂",
                     Category = "System",
                     IsSafe = true,
                     Paths = new[] 
@@ -34,7 +34,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Name = "Windows Update Cache",
                     Description = "Downloaded Windows update files",
-                    Icon = "Update",
+                    Icon = "🔄",
                     Category = "System",
                     IsSafe = true,
                     Paths = new[] 
@@ -47,7 +47,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Name = "Windows Logs",
                     Description = "CBS, DISM, Windows Error Reports",
-                    Icon = "Log",
+                    Icon = "📋",
                     Category = "System",
                     IsSafe = true,
                     Paths = new[] 
@@ -62,7 +62,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Name = "Prefetch Data",
                     Description = "Application prefetch cache",
-                    Icon = "Prefetch",
+                    Icon = "⚡",
                     Category = "System",
                     IsSafe = true,
                     Paths = new[] 
@@ -74,7 +74,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Name = "Thumbnail Cache",
                     Description = "Explorer thumbnail database",
-                    Icon = "Thumbnail",
+                    Icon = "🖼",
                     Category = "System",
                     IsSafe = true,
                     Paths = new[] 
@@ -88,13 +88,24 @@ namespace AIO_PC_Tool_v2.Services
                 new CleanerCategory
                 {
                     Name = "DirectX Shader Cache",
-                    Description = "Compiled shader cache files",
-                    Icon = "DirectX",
+                    Description = "Compiled DirectX shader files",
+                    Icon = "🎮",
                     Category = "Gaming",
                     IsSafe = true,
                     Paths = new[] 
                     { 
-                        Path.Combine(localAppData, @"D3DSCache"),
+                        Path.Combine(localAppData, @"D3DSCache")
+                    }
+                },
+                new CleanerCategory
+                {
+                    Name = "AMD GPU Cache",
+                    Description = "AMD driver and shader cache",
+                    Icon = "🔴",
+                    Category = "Gaming",
+                    IsSafe = true,
+                    Paths = new[] 
+                    { 
                         Path.Combine(localAppData, @"AMD\DxCache"),
                         Path.Combine(localAppData, @"AMD\DxcCache"),
                         Path.Combine(localAppData, @"AMD\GLCache"),
@@ -103,9 +114,9 @@ namespace AIO_PC_Tool_v2.Services
                 },
                 new CleanerCategory
                 {
-                    Name = "NVIDIA Cache",
+                    Name = "NVIDIA GPU Cache",
                     Description = "NVIDIA driver and shader cache",
-                    Icon = "NVIDIA",
+                    Icon = "🟢",
                     Category = "Gaming",
                     IsSafe = true,
                     Paths = new[] 
@@ -118,9 +129,9 @@ namespace AIO_PC_Tool_v2.Services
                 },
                 new CleanerCategory
                 {
-                    Name = "Intel Graphics Cache",
-                    Description = "Intel GPU shader cache",
-                    Icon = "Intel",
+                    Name = "Intel GPU Cache",
+                    Description = "Intel graphics shader cache",
+                    Icon = "🔵",
                     Category = "Gaming",
                     IsSafe = true,
                     Paths = new[] 
@@ -132,9 +143,9 @@ namespace AIO_PC_Tool_v2.Services
                 // Browsers
                 new CleanerCategory
                 {
-                    Name = "Chrome Cache",
-                    Description = "Google Chrome browser cache",
-                    Icon = "Chrome",
+                    Name = "Google Chrome",
+                    Description = "Chrome browser cache",
+                    Icon = "🌐",
                     Category = "Browser",
                     IsSafe = true,
                     Paths = new[] 
@@ -147,9 +158,9 @@ namespace AIO_PC_Tool_v2.Services
                 },
                 new CleanerCategory
                 {
-                    Name = "Edge Cache",
-                    Description = "Microsoft Edge browser cache",
-                    Icon = "Edge",
+                    Name = "Microsoft Edge",
+                    Description = "Edge browser cache",
+                    Icon = "🌐",
                     Category = "Browser",
                     IsSafe = true,
                     Paths = new[] 
@@ -162,22 +173,23 @@ namespace AIO_PC_Tool_v2.Services
                 },
                 new CleanerCategory
                 {
-                    Name = "Firefox Cache",
-                    Description = "Mozilla Firefox browser cache",
-                    Icon = "Firefox",
+                    Name = "Mozilla Firefox",
+                    Description = "Firefox browser cache",
+                    Icon = "🦊",
                     Category = "Browser",
                     IsSafe = true,
                     Paths = new[] 
                     { 
                         Path.Combine(localAppData, @"Mozilla\Firefox\Profiles")
                     },
-                    FilePatterns = new[] { "cache2" }
+                    FilePatterns = new[] { "cache2" },
+                    IsRecursivePatternSearch = true
                 },
                 new CleanerCategory
                 {
-                    Name = "Opera GX Cache",
+                    Name = "Opera GX",
                     Description = "Opera GX gaming browser cache",
-                    Icon = "Opera",
+                    Icon = "🎮",
                     Category = "Browser",
                     IsSafe = true,
                     Paths = new[] 
@@ -189,9 +201,9 @@ namespace AIO_PC_Tool_v2.Services
                 },
                 new CleanerCategory
                 {
-                    Name = "Brave Cache",
+                    Name = "Brave Browser",
                     Description = "Brave browser cache",
-                    Icon = "Brave",
+                    Icon = "🦁",
                     Category = "Browser",
                     IsSafe = true,
                     Paths = new[] 
@@ -201,27 +213,42 @@ namespace AIO_PC_Tool_v2.Services
                         Path.Combine(localAppData, @"BraveSoftware\Brave-Browser\User Data\ShaderCache")
                     }
                 },
+                new CleanerCategory
+                {
+                    Name = "Vivaldi Browser",
+                    Description = "Vivaldi browser cache",
+                    Icon = "🌐",
+                    Category = "Browser",
+                    IsSafe = true,
+                    Paths = new[] 
+                    { 
+                        Path.Combine(localAppData, @"Vivaldi\User Data\Default\Cache"),
+                        Path.Combine(localAppData, @"Vivaldi\User Data\Default\Code Cache"),
+                        Path.Combine(localAppData, @"Vivaldi\User Data\ShaderCache")
+                    }
+                },
 
                 // Gaming Platforms
                 new CleanerCategory
                 {
-                    Name = "Steam Cache",
+                    Name = "Steam",
                     Description = "Steam client cache and logs",
-                    Icon = "Steam",
+                    Icon = "🎮",
                     Category = "Gaming",
                     IsSafe = true,
                     Paths = new[] 
                     { 
                         Path.Combine(programData, @"Steam\htmlcache"),
                         Path.Combine(localAppData, @"Steam\htmlcache"),
-                        @"C:\Program Files (x86)\Steam\logs"
+                        @"C:\Program Files (x86)\Steam\logs",
+                        @"C:\Program Files\Steam\logs"
                     }
                 },
                 new CleanerCategory
                 {
-                    Name = "Epic Games Cache",
+                    Name = "Epic Games",
                     Description = "Epic Games Launcher cache",
-                    Icon = "Epic",
+                    Icon = "🎮",
                     Category = "Gaming",
                     IsSafe = true,
                     Paths = new[] 
@@ -232,9 +259,9 @@ namespace AIO_PC_Tool_v2.Services
                 },
                 new CleanerCategory
                 {
-                    Name = "EA App Cache",
+                    Name = "EA App",
                     Description = "EA App cache files",
-                    Icon = "EA",
+                    Icon = "🎮",
                     Category = "Gaming",
                     IsSafe = true,
                     Paths = new[] 
@@ -245,9 +272,9 @@ namespace AIO_PC_Tool_v2.Services
                 },
                 new CleanerCategory
                 {
-                    Name = "Ubisoft Cache",
+                    Name = "Ubisoft Connect",
                     Description = "Ubisoft Connect cache",
-                    Icon = "Ubisoft",
+                    Icon = "🎮",
                     Category = "Gaming",
                     IsSafe = true,
                     Paths = new[] 
@@ -258,9 +285,9 @@ namespace AIO_PC_Tool_v2.Services
                 },
                 new CleanerCategory
                 {
-                    Name = "GOG Galaxy Cache",
+                    Name = "GOG Galaxy",
                     Description = "GOG Galaxy client cache",
-                    Icon = "GOG",
+                    Icon = "🎮",
                     Category = "Gaming",
                     IsSafe = true,
                     Paths = new[] 
@@ -269,13 +296,39 @@ namespace AIO_PC_Tool_v2.Services
                         Path.Combine(localAppData, @"GOG.com\Galaxy\logs")
                     }
                 },
+                new CleanerCategory
+                {
+                    Name = "Battle.net",
+                    Description = "Blizzard Battle.net cache",
+                    Icon = "🎮",
+                    Category = "Gaming",
+                    IsSafe = true,
+                    Paths = new[] 
+                    { 
+                        Path.Combine(programData, @"Blizzard Entertainment\Battle.net\Cache"),
+                        Path.Combine(localAppData, @"Blizzard Entertainment\Battle.net\Cache")
+                    }
+                },
+                new CleanerCategory
+                {
+                    Name = "Riot Games",
+                    Description = "Riot Client cache (LoL, Valorant)",
+                    Icon = "🎮",
+                    Category = "Gaming",
+                    IsSafe = true,
+                    Paths = new[] 
+                    { 
+                        Path.Combine(localAppData, @"Riot Games\Riot Client\Cache"),
+                        Path.Combine(localAppData, @"Riot Games\Riot Client\Logs")
+                    }
+                },
 
                 // Applications
                 new CleanerCategory
                 {
-                    Name = "Discord Cache",
+                    Name = "Discord",
                     Description = "Discord app cache",
-                    Icon = "Discord",
+                    Icon = "💬",
                     Category = "Apps",
                     IsSafe = true,
                     Paths = new[] 
@@ -287,9 +340,9 @@ namespace AIO_PC_Tool_v2.Services
                 },
                 new CleanerCategory
                 {
-                    Name = "Spotify Cache",
+                    Name = "Spotify",
                     Description = "Spotify music cache",
-                    Icon = "Spotify",
+                    Icon = "🎵",
                     Category = "Apps",
                     IsSafe = true,
                     Paths = new[] 
@@ -299,9 +352,9 @@ namespace AIO_PC_Tool_v2.Services
                 },
                 new CleanerCategory
                 {
-                    Name = "VS Code Cache",
+                    Name = "VS Code",
                     Description = "Visual Studio Code cache",
-                    Icon = "VSCode",
+                    Icon = "💻",
                     Category = "Apps",
                     IsSafe = true,
                     Paths = new[] 
@@ -312,19 +365,161 @@ namespace AIO_PC_Tool_v2.Services
                         Path.Combine(appData, @"Code\GPUCache")
                     }
                 },
+                new CleanerCategory
+                {
+                    Name = "Slack",
+                    Description = "Slack app cache",
+                    Icon = "💼",
+                    Category = "Apps",
+                    IsSafe = true,
+                    Paths = new[] 
+                    { 
+                        Path.Combine(appData, @"Slack\Cache"),
+                        Path.Combine(appData, @"Slack\Code Cache"),
+                        Path.Combine(appData, @"Slack\GPUCache")
+                    }
+                },
+                new CleanerCategory
+                {
+                    Name = "Microsoft Teams",
+                    Description = "Teams app cache",
+                    Icon = "💼",
+                    Category = "Apps",
+                    IsSafe = true,
+                    Paths = new[] 
+                    { 
+                        Path.Combine(appData, @"Microsoft\Teams\Cache"),
+                        Path.Combine(appData, @"Microsoft\Teams\GPUCache"),
+                        Path.Combine(appData, @"Microsoft\Teams\blob_storage")
+                    }
+                },
+                new CleanerCategory
+                {
+                    Name = "Zoom",
+                    Description = "Zoom app cache",
+                    Icon = "📹",
+                    Category = "Apps",
+                    IsSafe = true,
+                    Paths = new[] 
+                    { 
+                        Path.Combine(appData, @"Zoom\data"),
+                        Path.Combine(appData, @"Zoom\bin\cache")
+                    }
+                },
 
                 // Recycle Bin
                 new CleanerCategory
                 {
                     Name = "Recycle Bin",
                     Description = "Deleted files awaiting permanent removal",
-                    Icon = "RecycleBin",
+                    Icon = "🗑",
                     Category = "System",
                     IsSafe = true,
                     IsRecycleBin = true,
                     Paths = Array.Empty<string>()
                 }
             };
+        }
+
+        /// <summary>
+        /// Gets only categories that exist on the system AND have files to clean
+        /// </summary>
+        public async Task<ObservableCollection<CleanerCategory>> GetCategoriesWithDataAsync()
+        {
+            var allCategories = GetAllPossibleCategories();
+            var validCategories = new ObservableCollection<CleanerCategory>();
+
+            await Task.Run(() =>
+            {
+                foreach (var category in allCategories)
+                {
+                    if (CategoryHasData(category))
+                    {
+                        validCategories.Add(category);
+                    }
+                }
+            });
+
+            return validCategories;
+        }
+
+        /// <summary>
+        /// Quick check if a category has any files (doesn't count them all, just checks existence)
+        /// </summary>
+        private bool CategoryHasData(CleanerCategory category)
+        {
+            if (category.IsRecycleBin)
+            {
+                return RecycleBinHasFiles();
+            }
+
+            foreach (var path in category.Paths)
+            {
+                if (Directory.Exists(path))
+                {
+                    try
+                    {
+                        if (category.FilePatterns != null && category.FilePatterns.Length > 0)
+                        {
+                            foreach (var pattern in category.FilePatterns)
+                            {
+                                var searchOption = category.IsRecursivePatternSearch 
+                                    ? SearchOption.AllDirectories 
+                                    : SearchOption.TopDirectoryOnly;
+                                    
+                                if (Directory.EnumerateFiles(path, pattern, searchOption).Any())
+                                {
+                                    return true;
+                                }
+                                
+                                // Also check for directories matching pattern
+                                if (Directory.EnumerateDirectories(path, pattern, searchOption).Any())
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Check if there are any files
+                            if (Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories).Any())
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Access denied or other error - skip
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool RecycleBinHasFiles()
+        {
+            try
+            {
+                var recyclePath = @"C:\$Recycle.Bin";
+                if (Directory.Exists(recyclePath))
+                {
+                    foreach (var dir in Directory.GetDirectories(recyclePath))
+                    {
+                        try
+                        {
+                            if (Directory.EnumerateFiles(dir, "*", SearchOption.AllDirectories).Any())
+                            {
+                                return true;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+            return false;
         }
 
         public async Task<(long size, int count)> ScanCategoryAsync(CleanerCategory category)
@@ -336,7 +531,6 @@ namespace AIO_PC_Tool_v2.Services
 
                 if (category.IsRecycleBin)
                 {
-                    // Handle Recycle Bin specially
                     try
                     {
                         var recyclePath = @"C:\$Recycle.Bin";
@@ -372,19 +566,35 @@ namespace AIO_PC_Tool_v2.Services
                         {
                             try
                             {
-                                string[] files;
+                                IEnumerable<string> files;
+                                
                                 if (category.FilePatterns != null && category.FilePatterns.Length > 0)
                                 {
                                     var fileList = new List<string>();
+                                    var searchOption = category.IsRecursivePatternSearch 
+                                        ? SearchOption.AllDirectories 
+                                        : SearchOption.TopDirectoryOnly;
+                                        
                                     foreach (var pattern in category.FilePatterns)
                                     {
                                         try
                                         {
-                                            fileList.AddRange(Directory.GetFiles(path, pattern, SearchOption.AllDirectories));
+                                            // Get files matching pattern
+                                            fileList.AddRange(Directory.GetFiles(path, pattern, searchOption));
+                                            
+                                            // Also get files inside directories matching pattern
+                                            foreach (var dir in Directory.GetDirectories(path, pattern, searchOption))
+                                            {
+                                                try
+                                                {
+                                                    fileList.AddRange(Directory.GetFiles(dir, "*", SearchOption.AllDirectories));
+                                                }
+                                                catch { }
+                                            }
                                         }
                                         catch { }
                                     }
-                                    files = fileList.ToArray();
+                                    files = fileList;
                                 }
                                 else
                                 {
@@ -421,19 +631,19 @@ namespace AIO_PC_Tool_v2.Services
 
                 if (category.IsRecycleBin)
                 {
-                    // Empty Recycle Bin using Shell
                     try
                     {
+                        // Use SHEmptyRecycleBin for proper recycle bin emptying
+                        cleaned = category.Size;
                         var psi = new System.Diagnostics.ProcessStartInfo
                         {
                             FileName = "cmd.exe",
-                            Arguments = "/c rd /s /q C:\\$Recycle.Bin",
+                            Arguments = "/c PowerShell.exe -NoProfile -Command \"Clear-RecycleBin -Force -ErrorAction SilentlyContinue\"",
                             CreateNoWindow = true,
-                            UseShellExecute = false,
-                            Verb = "runas"
+                            UseShellExecute = false
                         };
-                        System.Diagnostics.Process.Start(psi)?.WaitForExit(5000);
-                        cleaned = category.Size;
+                        var proc = System.Diagnostics.Process.Start(psi);
+                        proc?.WaitForExit(10000);
                     }
                     catch { }
                 }
@@ -445,19 +655,33 @@ namespace AIO_PC_Tool_v2.Services
                         {
                             try
                             {
-                                string[] files;
+                                IEnumerable<string> files;
+                                
                                 if (category.FilePatterns != null && category.FilePatterns.Length > 0)
                                 {
                                     var fileList = new List<string>();
+                                    var searchOption = category.IsRecursivePatternSearch 
+                                        ? SearchOption.AllDirectories 
+                                        : SearchOption.TopDirectoryOnly;
+                                        
                                     foreach (var pattern in category.FilePatterns)
                                     {
                                         try
                                         {
-                                            fileList.AddRange(Directory.GetFiles(path, pattern, SearchOption.AllDirectories));
+                                            fileList.AddRange(Directory.GetFiles(path, pattern, searchOption));
+                                            
+                                            foreach (var dir in Directory.GetDirectories(path, pattern, searchOption))
+                                            {
+                                                try
+                                                {
+                                                    fileList.AddRange(Directory.GetFiles(dir, "*", SearchOption.AllDirectories));
+                                                }
+                                                catch { }
+                                            }
                                         }
                                         catch { }
                                     }
-                                    files = fileList.ToArray();
+                                    files = fileList;
                                 }
                                 else
                                 {
@@ -501,33 +725,26 @@ namespace AIO_PC_Tool_v2.Services
             });
         }
 
-        public async Task<(long totalSize, int totalFiles)> ScanAllAsync(ObservableCollection<CleanerCategory> categories)
+        public async Task<(long totalSize, int totalFiles, int categoryCount)> ScanAllAsync(ObservableCollection<CleanerCategory> categories)
         {
             long totalSize = 0;
             int totalFiles = 0;
 
-            var tasks = categories.Select(async cat =>
+            foreach (var cat in categories)
             {
                 var (size, count) = await ScanCategoryAsync(cat);
-                return (size, count);
-            });
-
-            var results = await Task.WhenAll(tasks);
-            
-            foreach (var (size, count) in results)
-            {
                 totalSize += size;
                 totalFiles += count;
             }
 
-            return (totalSize, totalFiles);
+            return (totalSize, totalFiles, categories.Count);
         }
 
         public async Task<long> CleanSelectedAsync(ObservableCollection<CleanerCategory> categories)
         {
             long totalCleaned = 0;
 
-            foreach (var category in categories.Where(c => c.IsSelected))
+            foreach (var category in categories.Where(c => c.IsSelected && c.Size > 0))
             {
                 totalCleaned += await CleanCategoryAsync(category);
             }

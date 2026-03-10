@@ -52,6 +52,7 @@ namespace AIO_PC_Tool_v2.Models
         public string Category { get; set; } = string.Empty;
         public bool IsSafe { get; set; } = true;
         public bool IsRecycleBin { get; set; }
+        public bool IsRecursivePatternSearch { get; set; }
         public string[] Paths { get; set; } = Array.Empty<string>();
         public string[]? FilePatterns { get; set; }
 
