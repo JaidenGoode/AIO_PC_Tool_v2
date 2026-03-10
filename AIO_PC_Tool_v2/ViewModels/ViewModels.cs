@@ -78,7 +78,8 @@ namespace AIO_PC_Tool_v2.ViewModels
 
         private void LoadTweaks()
         {
-            Tweaks = _tweakService.GetAllTweaks();
+            var tweakList = _tweakService.GetAllTweaks();
+            Tweaks = new ObservableCollection<Tweak>(tweakList);
             foreach (var tweak in Tweaks)
             {
                 _tweakService.CheckTweakStatus(tweak);
@@ -153,13 +154,17 @@ namespace AIO_PC_Tool_v2.ViewModels
         public CleanerViewModel()
         {
             _cleanerService = new CleanerService();
-            Categories = _cleanerService.GetCategories();
+            // Categories will be loaded on scan
         }
 
         [RelayCommand]
         private async Task Scan()
         {
             StatusMessage = "Scanning...";
+            
+            // Get categories that have data
+            Categories = await _cleanerService.GetCategoriesWithDataAsync();
+            
             long total = 0;
             int files = 0;
 
