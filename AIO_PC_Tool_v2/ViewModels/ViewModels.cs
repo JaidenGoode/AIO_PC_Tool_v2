@@ -10,7 +10,7 @@ namespace AIO_PC_Tool_v2.ViewModels
 {
     public partial class DashboardViewModel : ObservableObject
     {
-        private readonly HardwareMonitorService _hardwareService;
+        private HardwareMonitorService? _hardwareService;
         private readonly DispatcherTimer _timer;
 
         [ObservableProperty]
@@ -18,8 +18,16 @@ namespace AIO_PC_Tool_v2.ViewModels
 
         public DashboardViewModel()
         {
-            _hardwareService = new HardwareMonitorService();
-            _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            try
+            {
+                _hardwareService = new HardwareMonitorService();
+            }
+            catch
+            {
+                _hardwareService = null;
+            }
+            
+            _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             _timer.Tick += (s, e) => UpdateSystemInfo();
             _timer.Start();
             UpdateSystemInfo();
@@ -27,7 +35,14 @@ namespace AIO_PC_Tool_v2.ViewModels
 
         private void UpdateSystemInfo()
         {
-            SystemInfo = _hardwareService.GetSystemInfo();
+            try
+            {
+                if (_hardwareService != null)
+                {
+                    SystemInfo = _hardwareService.GetSystemInfo();
+                }
+            }
+            catch { }
         }
     }
 
