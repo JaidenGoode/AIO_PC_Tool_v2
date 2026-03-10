@@ -15,21 +15,36 @@
 
         <!-- Sidebar -->
         <Border Grid.Column="0" Background="#1A1A1A">
-            <StackPanel Margin="20,24,20,32">
-                <TextBlock Text="JGoode's" FontSize="14" Foreground="#A3A3A3"/>
-                <TextBlock Text="AIO PC Tool" FontSize="24" FontWeight="Bold" Foreground="#DC2626"/>
-                <TextBlock Text="v4.0" FontSize="12" Foreground="#737373" Margin="0,4,0,0"/>
-                
-                <TextBlock Text="App is working!" FontSize="16" Foreground="White" Margin="0,40,0,0"/>
-            </StackPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Logo -->
+                <StackPanel Grid.Row="0" Margin="20,24,20,32">
+                    <TextBlock Text="JGoode's" FontSize="14" Foreground="#A3A3A3"/>
+                    <TextBlock Text="AIO PC Tool" FontSize="24" FontWeight="Bold" Foreground="#DC2626"/>
+                    <TextBlock Text="v4.0" FontSize="12" Foreground="#737373" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <!-- Navigation -->
+                <StackPanel Grid.Row="1" Margin="12,0">
+                    <Button x:Name="NavDashboard" Content="Dashboard" Click="NavButton_Click" Tag="Dashboard" Style="{StaticResource NavButtonStyle}"/>
+                    <Button x:Name="NavTweaks" Content="Tweaks" Click="NavButton_Click" Tag="Tweaks" Style="{StaticResource NavButtonStyle}"/>
+                    <Button x:Name="NavCleaner" Content="Cleaner" Click="NavButton_Click" Tag="Cleaner" Style="{StaticResource NavButtonStyle}"/>
+                    <Button x:Name="NavDns" Content="DNS Manager" Click="NavButton_Click" Tag="Dns" Style="{StaticResource NavButtonStyle}"/>
+                    <Button x:Name="NavRestore" Content="Restore Points" Click="NavButton_Click" Tag="Restore" Style="{StaticResource NavButtonStyle}"/>
+                    <Button x:Name="NavUtilities" Content="Utilities" Click="NavButton_Click" Tag="Utilities" Style="{StaticResource NavButtonStyle}"/>
+                </StackPanel>
+
+                <!-- Settings -->
+                <Button Grid.Row="2" x:Name="NavSettings" Content="Settings" Click="NavButton_Click" Tag="Settings" Style="{StaticResource NavButtonStyle}" Margin="12,0,12,20"/>
+            </Grid>
         </Border>
 
         <!-- Main Content -->
-        <Border Grid.Column="1" Background="#0D0D0D" Padding="32,24">
-            <StackPanel>
-                <TextBlock Text="Dashboard" FontSize="28" FontWeight="Bold" Foreground="White"/>
-                <TextBlock Text="The application loaded successfully!" FontSize="14" Foreground="#A3A3A3" Margin="0,8,0,0"/>
-            </StackPanel>
-        </Border>
+        <Frame x:Name="MainFrame" Grid.Column="1" NavigationUIVisibility="Hidden" Background="#0D0D0D"/>
     </Grid>
 </Window>
