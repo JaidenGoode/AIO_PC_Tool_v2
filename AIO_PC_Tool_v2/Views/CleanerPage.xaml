@@ -33,7 +33,7 @@
                 </Grid>
                 
                 <!-- Stats Bar -->
-                <Border Grid.Row="1" Background="Linear" CornerRadius="12" Margin="0,0,0,24">
+                <Border Grid.Row="1" CornerRadius="12" Margin="0,0,0,24">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                             <GradientStop Color="#141414" Offset="0"/>

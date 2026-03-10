@@ -144,7 +144,7 @@
 
                         <!-- Footer -->
                         <StackPanel Grid.Row="2" Margin="16,0,16,20">
-                            <Border Background="#121212" CornerRadius="10" Padding="16" Cursor="Hand">
+                            <Border CornerRadius="10" Padding="16" Cursor="Hand">
                                 <Border.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                         <GradientStop Color="#1A1A1A" Offset="0"/>
