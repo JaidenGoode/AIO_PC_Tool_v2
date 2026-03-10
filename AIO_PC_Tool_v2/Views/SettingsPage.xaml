@@ -1,3 +1,57 @@
+File: Views\DnsPage.xaml - Replace the ENTIRE file with:
+
+<Page x:Class="AIO_PC_Tool_v2.Views.DnsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      xmlns:vm="clr-namespace:AIO_PC_Tool_v2.ViewModels"
+      Title="DNS Manager" Background="Transparent">
+    
+    <Page.DataContext>
+        <vm:DnsViewModel/>
+    </Page.DataContext>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="DNS Manager" FontSize="28" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+            <TextBlock Text="Change your DNS servers for faster browsing and better privacy" FontSize="14" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0"/>
+        </StackPanel>
+        
+        <ListBox Grid.Row="1" ItemsSource="{Binding Providers}" SelectedItem="{Binding SelectedProvider}" Background="Transparent" BorderThickness="0">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{StaticResource BackgroundCard}" CornerRadius="10" Padding="16" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Border Background="{StaticResource BackgroundCardHover}" CornerRadius="4" Padding="8,4">
+                                    <TextBlock Text="{Binding PrimaryDns}" FontSize="12" Foreground="{StaticResource TextMuted}" FontFamily="Consolas"/>
+                                </Border>
+                                <Border Background="{StaticResource BackgroundCardHover}" CornerRadius="4" Padding="8,4" Margin="8,0,0,0">
+                                    <TextBlock Text="{Binding SecondaryDns}" FontSize="12" Foreground="{StaticResource TextMuted}" FontFamily="Consolas"/>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Reset to Automatic" Command="{Binding ResetDnsCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,12,0"/>
+            <Button Content="Apply DNS" Command="{Binding ApplyDnsCommand}" Style="{StaticResource MaterialDesignFlatMidBgButton}" Background="{StaticResource AccentPrimary}" Foreground="White"/>
+        </StackPanel>
+    </Grid>
+</Page>
+File: Views\SettingsPage.xaml - Replace the ENTIRE file with:
+
 <Page x:Class="AIO_PC_Tool_v2.Views.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -15,7 +69,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
-        <!-- Header -->
         <StackPanel Grid.Row="0" Margin="0,0,0,24">
             <TextBlock Text="Settings" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
             <TextBlock Text="Customize the appearance of the application" FontSize="14" Foreground="{DynamicResource TextSecondary}" Margin="0,4,0,0"/>
@@ -24,12 +77,10 @@
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel MaxWidth="600">
                 
-                <!-- Theme Section -->
                 <Border Background="{DynamicResource BackgroundCard}" CornerRadius="12" Padding="20" Margin="0,0,0,16">
                     <StackPanel>
                         <TextBlock Text="APPEARANCE" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,16"/>
                         
-                        <!-- Dark Mode Toggle -->
                         <Grid Margin="0,0,0,20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -41,79 +92,21 @@
                                 <TextBlock Text="Use dark theme for the application" FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0,4,0,0"/>
                             </StackPanel>
                             
-                            <ToggleButton Grid.Column="1" 
-                                          IsChecked="{Binding IsDarkMode}"
-                                          Style="{StaticResource MaterialDesignSwitchToggleButton}"
-                                          VerticalAlignment="Center"/>
+                            <ToggleButton Grid.Column="1" IsChecked="{Binding IsDarkMode}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Center"/>
                         </Grid>
                         
-                        <!-- Accent Color -->
                         <TextBlock Text="Accent Color" FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,12"/>
-                        <ItemsControl ItemsSource="{Binding AccentColors}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <RadioButton GroupName="AccentColor" 
-                                                 IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ContentPresenter}}"
-                                                 Margin="0,0,8,8"
-                                                 Command="{Binding DataContext.SelectAccentCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                                 CommandParameter="{Binding}">
-                                        <RadioButton.Template>
-                                            <ControlTemplate TargetType="RadioButton">
-                                                <Border x:Name="border" Width="40" Height="40" CornerRadius="20" 
-                                                        BorderThickness="3" BorderBrush="Transparent" Cursor="Hand">
-                                                    <Ellipse Width="30" Height="30">
-                                                        <Ellipse.Fill>
-                                                            <SolidColorBrush Color="{Binding Converter={x:Static materialDesign:ColorConverter.Default}}"/>
-                                                        </Ellipse.Fill>
-                                                    </Ellipse>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsChecked" Value="True">
-                                                        <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource TextPrimary}"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </RadioButton.Template>
-                                    </RadioButton>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <ComboBox ItemsSource="{Binding AccentColors}" SelectedItem="{Binding SelectedAccent}" Style="{StaticResource MaterialDesignOutlinedComboBox}" Width="200" HorizontalAlignment="Left"/>
                     </StackPanel>
                 </Border>
                 
-                <!-- About Section -->
                 <Border Background="{DynamicResource BackgroundCard}" CornerRadius="12" Padding="20">
                     <StackPanel>
                         <TextBlock Text="ABOUT" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,16"/>
-                        
                         <TextBlock Text="JGoode's AIO PC Tool v2" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
                         <TextBlock Text="Version 4.0.0" FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0,4,0,0"/>
-                        
-                        <TextBlock Text="A professional Windows optimization tool built with WPF and .NET 8. Features safe, reversible system tweaks with detailed descriptions and warnings."
-                                   FontSize="13" 
-                                   Foreground="{DynamicResource TextSecondary}" 
-                                   TextWrapping="Wrap" 
-                                   Margin="0,16,0,20"/>
-                        
-                        <!-- Features list -->
-                        <Border Background="{DynamicResource BackgroundInput}" CornerRadius="8" Padding="16" Margin="0,0,0,20">
-                            <StackPanel>
-                                <TextBlock Text="Built with" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextMuted}" Margin="0,0,0,8"/>
-                                <TextBlock Text="WPF (.NET 8)" FontSize="13" Foreground="{DynamicResource TextSecondary}"/>
-                                <TextBlock Text="Material Design in XAML" FontSize="13" Foreground="{DynamicResource TextSecondary}"/>
-                                <TextBlock Text="LibreHardwareMonitor" FontSize="13" Foreground="{DynamicResource TextSecondary}"/>
-                                <TextBlock Text="CommunityToolkit.Mvvm" FontSize="13" Foreground="{DynamicResource TextSecondary}"/>
-                            </StackPanel>
-                        </Border>
-                        
-                        <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}">
-                            <Run Text="Created by JaidenGoode"/>
-                        </TextBlock>
+                        <TextBlock Text="A professional Windows optimization tool built with WPF and .NET 8." FontSize="13" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" Margin="0,16,0,0"/>
+                        <TextBlock Text="Created by JaidenGoode" FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,16,0,0"/>
                     </StackPanel>
                 </Border>
                 

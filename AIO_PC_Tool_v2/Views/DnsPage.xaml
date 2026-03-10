@@ -16,59 +16,35 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
-        <!-- Header -->
         <StackPanel Grid.Row="0" Margin="0,0,0,24">
             <TextBlock Text="DNS Manager" FontSize="28" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
             <TextBlock Text="Change your DNS servers for faster browsing and better privacy" FontSize="14" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0"/>
         </StackPanel>
         
-        <!-- DNS Providers -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding Providers}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="{StaticResource BackgroundCard}" CornerRadius="10" Padding="16" Margin="0,0,0,8"
-                                BorderBrush="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={x:Static materialDesign:BooleanToVisibilityConverter.Instance}}"
-                                BorderThickness="2">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                
-                                <RadioButton Grid.Column="0" 
-                                             IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=TwoWay}"
-                                             GroupName="DnsProviders"
-                                             VerticalAlignment="Center"/>
-                                
-                                <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" Foreground="{StaticResource TextPrimary}"/>
-                                    <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                        <Border Background="{StaticResource BackgroundCardHover}" CornerRadius="4" Padding="8,4">
-                                            <TextBlock Text="{Binding PrimaryDns}" FontSize="12" Foreground="{StaticResource TextMuted}" FontFamily="Consolas"/>
-                                        </Border>
-                                        <Border Background="{StaticResource BackgroundCardHover}" CornerRadius="4" Padding="8,4" Margin="8,0,0,0">
-                                            <TextBlock Text="{Binding SecondaryDns}" FontSize="12" Foreground="{StaticResource TextMuted}" FontFamily="Consolas"/>
-                                        </Border>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+        <ListBox Grid.Row="1" ItemsSource="{Binding Providers}" SelectedItem="{Binding SelectedProvider}" Background="Transparent" BorderThickness="0">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{StaticResource BackgroundCard}" CornerRadius="10" Padding="16" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Border Background="{StaticResource BackgroundCardHover}" CornerRadius="4" Padding="8,4">
+                                    <TextBlock Text="{Binding PrimaryDns}" FontSize="12" Foreground="{StaticResource TextMuted}" FontFamily="Consolas"/>
+                                </Border>
+                                <Border Background="{StaticResource BackgroundCardHover}" CornerRadius="4" Padding="8,4" Margin="8,0,0,0">
+                                    <TextBlock Text="{Binding SecondaryDns}" FontSize="12" Foreground="{StaticResource TextMuted}" FontFamily="Consolas"/>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
         
-        <!-- Action Buttons -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-            <Button Content="Reset to Automatic" Command="{Binding ResetDnsCommand}"
-                    Style="{StaticResource MaterialDesignOutlinedButton}"
-                    Margin="0,0,12,0"/>
-            <Button Content="Apply DNS" Command="{Binding ApplyDnsCommand}"
-                    Style="{StaticResource MaterialDesignFlatMidBgButton}"
-                    Background="{StaticResource AccentPrimary}" Foreground="White"/>
+            <Button Content="Reset to Automatic" Command="{Binding ResetDnsCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,12,0"/>
+            <Button Content="Apply DNS" Command="{Binding ApplyDnsCommand}" Style="{StaticResource MaterialDesignFlatMidBgButton}" Background="{StaticResource AccentPrimary}" Foreground="White"/>
         </StackPanel>
     </Grid>
 </Page>
