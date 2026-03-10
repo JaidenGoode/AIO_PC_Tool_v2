@@ -16,22 +16,36 @@
             <TextBlock Text="Optimize your Windows system with safe, reversible tweaks" FontSize="14" Foreground="#A3A3A3" Margin="0,4,0,0"/>
         </StackPanel>
         
-        <!-- Category Filter -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,16">
-            <ComboBox x:Name="CategoryFilter" Width="200" SelectionChanged="CategoryFilter_Changed">
-                <ComboBoxItem Content="All" IsSelected="True"/>
-                <ComboBoxItem Content="Privacy"/>
-                <ComboBoxItem Content="Performance"/>
-                <ComboBoxItem Content="Gaming"/>
-                <ComboBoxItem Content="Visual"/>
-                <ComboBoxItem Content="Network"/>
-                <ComboBoxItem Content="Power"/>
-                <ComboBoxItem Content="Security"/>
-                <ComboBoxItem Content="Storage"/>
-            </ComboBox>
-            <Button Content="Apply All Shown" Click="ApplyAll_Click" Style="{StaticResource PrimaryButtonStyle}" Margin="16,0,0,0"/>
-            <Button Content="Revert All Shown" Click="RevertAll_Click" Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
-        </StackPanel>
+        <!-- Controls -->
+        <Border Grid.Row="1" Background="#1A1A1A" CornerRadius="10" Padding="16" Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="Category:" Foreground="#A3A3A3" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                    <ComboBox x:Name="CategoryFilter" Width="180" SelectionChanged="CategoryFilter_Changed" Background="#252525" Foreground="White" BorderThickness="0" Padding="12,8">
+                        <ComboBoxItem Content="All" IsSelected="True"/>
+                        <ComboBoxItem Content="Privacy"/>
+                        <ComboBoxItem Content="Performance"/>
+                        <ComboBoxItem Content="Gaming"/>
+                        <ComboBoxItem Content="Visual"/>
+                        <ComboBoxItem Content="Network"/>
+                        <ComboBoxItem Content="Power"/>
+                        <ComboBoxItem Content="Security"/>
+                        <ComboBoxItem Content="Storage"/>
+                    </ComboBox>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Content="Apply All Shown" Click="ApplyAll_Click" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0"/>
+                    <Button Content="Revert All Shown" Click="RevertAll_Click" Style="{StaticResource SecondaryButtonStyle}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
         
         <!-- Tweaks List -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">

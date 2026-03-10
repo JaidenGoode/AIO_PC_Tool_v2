@@ -16,11 +16,20 @@ namespace AIO_PC_Tool_v2.Views
         {
             InitializeComponent();
             _tweakService = new TweakService();
-            _allTweaks = _tweakService.GetAllTweaks().ToList();
+            _allTweaks = new List<Tweak>();
             
-            foreach (var tweak in _allTweaks)
+            try
             {
-                _tweakService.CheckTweakStatus(tweak);
+                _allTweaks = _tweakService.GetAllTweaks().ToList();
+                
+                foreach (var tweak in _allTweaks)
+                {
+                    try { _tweakService.CheckTweakStatus(tweak); } catch { }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading tweaks: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             
             DisplayTweaks();
@@ -30,7 +39,7 @@ namespace AIO_PC_Tool_v2.Views
         {
             if (CategoryFilter.SelectedItem is ComboBoxItem item)
             {
-                _currentCategory = item.Content.ToString() ?? "All";
+                _currentCategory = item.Content?.ToString() ?? "All";
                 DisplayTweaks();
             }
         }
@@ -54,40 +63,37 @@ namespace AIO_PC_Tool_v2.Views
             var card = new Border
             {
                 Background = new SolidColorBrush(Color.FromRgb(26, 26, 26)),
-                CornerRadius = new CornerRadius(10),
-                Padding = new Thickness(16),
-                Margin = new Thickness(0, 0, 0, 8)
+                CornerRadius = new CornerRadius(12),
+                Padding = new Thickness(20),
+                Margin = new Thickness(0, 0, 0, 12)
             };
 
-            var grid = new Grid();
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            var mainStack = new StackPanel();
 
-            // Content
-            var content = new StackPanel();
+            // Title row with badges
+            var titleRow = new WrapPanel { Margin = new Thickness(0, 0, 0, 12) };
             
-            // Title row
-            var titleRow = new StackPanel { Orientation = Orientation.Horizontal };
             titleRow.Children.Add(new TextBlock 
             { 
                 Text = tweak.Title, 
                 FontWeight = FontWeights.SemiBold, 
-                FontSize = 15, 
+                FontSize = 16, 
                 Foreground = Brushes.White,
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 12, 0)
             });
             
             // Category badge
             var categoryBadge = new Border
             {
                 Background = GetCategoryColor(tweak.Category),
-                CornerRadius = new CornerRadius(4),
-                Padding = new Thickness(8, 2, 8, 2),
-                Margin = new Thickness(12, 0, 0, 0)
+                CornerRadius = new CornerRadius(6),
+                Padding = new Thickness(10, 4, 10, 4),
+                Margin = new Thickness(0, 0, 8, 0)
             };
             categoryBadge.Child = new TextBlock 
             { 
-                Text = tweak.Category, 
+                Text = tweak.Category.ToUpper(), 
                 FontSize = 10, 
                 Foreground = Brushes.White,
                 FontWeight = FontWeights.Bold
@@ -97,10 +103,12 @@ namespace AIO_PC_Tool_v2.Views
             // Status badge
             var statusBadge = new Border
             {
-                Background = tweak.IsActive ? new SolidColorBrush(Color.FromRgb(34, 197, 94)) : new SolidColorBrush(Color.FromRgb(64, 64, 64)),
-                CornerRadius = new CornerRadius(4),
-                Padding = new Thickness(8, 2, 8, 2),
-                Margin = new Thickness(8, 0, 0, 0)
+                Background = tweak.IsActive 
+                    ? new SolidColorBrush(Color.FromRgb(34, 197, 94)) 
+                    : new SolidColorBrush(Color.FromRgb(64, 64, 64)),
+                CornerRadius = new CornerRadius(6),
+                Padding = new Thickness(10, 4, 10, 4),
+                Margin = new Thickness(0, 0, 8, 0)
             };
             statusBadge.Child = new TextBlock 
             { 
@@ -110,18 +118,33 @@ namespace AIO_PC_Tool_v2.Views
                 FontWeight = FontWeights.Bold
             };
             titleRow.Children.Add(statusBadge);
-            
-            content.Children.Add(titleRow);
+
+            // Windows version badge
+            var winBadge = new Border
+            {
+                Background = new SolidColorBrush(Color.FromRgb(45, 45, 45)),
+                CornerRadius = new CornerRadius(6),
+                Padding = new Thickness(10, 4, 10, 4)
+            };
+            winBadge.Child = new TextBlock 
+            { 
+                Text = $"Win {tweak.WindowsVersion}", 
+                FontSize = 10, 
+                Foreground = new SolidColorBrush(Color.FromRgb(140, 140, 140)),
+                FontWeight = FontWeights.Medium
+            };
+            titleRow.Children.Add(winBadge);
+
+            mainStack.Children.Add(titleRow);
             
             // Description
-            content.Children.Add(new TextBlock 
+            mainStack.Children.Add(new TextBlock 
             { 
                 Text = tweak.Description, 
-                FontSize = 13, 
-                Foreground = new SolidColorBrush(Color.FromRgb(163, 163, 163)),
+                FontSize = 14, 
+                Foreground = new SolidColorBrush(Color.FromRgb(180, 180, 180)),
                 TextWrapping = TextWrapping.Wrap,
-                Margin = new Thickness(0, 8, 0, 0),
-                MaxWidth = 600
+                Margin = new Thickness(0, 0, 0, 12)
             });
             
             // Warning if present
@@ -129,56 +152,60 @@ namespace AIO_PC_Tool_v2.Views
             {
                 var warningBorder = new Border
                 {
-                    Background = new SolidColorBrush(Color.FromRgb(254, 243, 199)),
-                    CornerRadius = new CornerRadius(6),
-                    Padding = new Thickness(12, 8, 12, 8),
-                    Margin = new Thickness(0, 8, 0, 0)
+                    Background = new SolidColorBrush(Color.FromRgb(60, 40, 20)),
+                    BorderBrush = new SolidColorBrush(Color.FromRgb(200, 120, 40)),
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(8),
+                    Padding = new Thickness(14, 10, 14, 10),
+                    Margin = new Thickness(0, 0, 0, 12)
                 };
                 warningBorder.Child = new TextBlock
                 {
                     Text = "⚠ " + tweak.Warning,
-                    FontSize = 12,
-                    Foreground = new SolidColorBrush(Color.FromRgb(146, 64, 14)),
+                    FontSize = 13,
+                    Foreground = new SolidColorBrush(Color.FromRgb(255, 180, 100)),
                     TextWrapping = TextWrapping.Wrap
                 };
-                content.Children.Add(warningBorder);
+                mainStack.Children.Add(warningBorder);
             }
             
-            Grid.SetColumn(content, 0);
-            grid.Children.Add(content);
-
             // Buttons
-            var buttons = new StackPanel 
-            { 
-                Orientation = Orientation.Horizontal, 
-                VerticalAlignment = VerticalAlignment.Center 
-            };
+            var buttonRow = new StackPanel { Orientation = Orientation.Horizontal };
             
-            var applyBtn = new Button 
-            { 
-                Content = "Apply", 
-                Style = (Style)Application.Current.Resources["PrimaryButtonStyle"],
-                Visibility = tweak.IsActive ? Visibility.Collapsed : Visibility.Visible,
-                Tag = tweak
-            };
-            applyBtn.Click += ApplyTweak_Click;
+            if (!tweak.IsActive)
+            {
+                var applyBtn = new Button 
+                { 
+                    Content = "Apply Tweak", 
+                    Background = new SolidColorBrush(Color.FromRgb(220, 38, 38)),
+                    Foreground = Brushes.White,
+                    BorderThickness = new Thickness(0),
+                    Padding = new Thickness(20, 10, 20, 10),
+                    Cursor = System.Windows.Input.Cursors.Hand,
+                    Tag = tweak
+                };
+                applyBtn.Click += ApplyTweak_Click;
+                buttonRow.Children.Add(applyBtn);
+            }
+            else
+            {
+                var revertBtn = new Button 
+                { 
+                    Content = "Revert to Default", 
+                    Background = new SolidColorBrush(Color.FromRgb(45, 45, 45)),
+                    Foreground = new SolidColorBrush(Color.FromRgb(180, 180, 180)),
+                    BorderBrush = new SolidColorBrush(Color.FromRgb(80, 80, 80)),
+                    BorderThickness = new Thickness(1),
+                    Padding = new Thickness(20, 10, 20, 10),
+                    Cursor = System.Windows.Input.Cursors.Hand,
+                    Tag = tweak
+                };
+                revertBtn.Click += RevertTweak_Click;
+                buttonRow.Children.Add(revertBtn);
+            }
             
-            var revertBtn = new Button 
-            { 
-                Content = "Revert", 
-                Style = (Style)Application.Current.Resources["SecondaryButtonStyle"],
-                Visibility = tweak.IsActive ? Visibility.Visible : Visibility.Collapsed,
-                Tag = tweak
-            };
-            revertBtn.Click += RevertTweak_Click;
-            
-            buttons.Children.Add(applyBtn);
-            buttons.Children.Add(revertBtn);
-            
-            Grid.SetColumn(buttons, 1);
-            grid.Children.Add(buttons);
-
-            card.Child = grid;
+            mainStack.Children.Add(buttonRow);
+            card.Child = mainStack;
             return card;
         }
 
@@ -202,8 +229,15 @@ namespace AIO_PC_Tool_v2.Views
         {
             if (sender is Button btn && btn.Tag is Tweak tweak)
             {
-                _tweakService.ApplyTweak(tweak);
-                DisplayTweaks();
+                try
+                {
+                    _tweakService.ApplyTweak(tweak);
+                    DisplayTweaks();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to apply tweak: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -211,8 +245,15 @@ namespace AIO_PC_Tool_v2.Views
         {
             if (sender is Button btn && btn.Tag is Tweak tweak)
             {
-                _tweakService.RevertTweak(tweak);
-                DisplayTweaks();
+                try
+                {
+                    _tweakService.RevertTweak(tweak);
+                    DisplayTweaks();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to revert tweak: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -224,7 +265,7 @@ namespace AIO_PC_Tool_v2.Views
                 
             foreach (var tweak in filtered.Where(t => !t.IsActive))
             {
-                _tweakService.ApplyTweak(tweak);
+                try { _tweakService.ApplyTweak(tweak); } catch { }
             }
             DisplayTweaks();
         }
@@ -237,7 +278,7 @@ namespace AIO_PC_Tool_v2.Views
                 
             foreach (var tweak in filtered.Where(t => t.IsActive))
             {
-                _tweakService.RevertTweak(tweak);
+                try { _tweakService.RevertTweak(tweak); } catch { }
             }
             DisplayTweaks();
         }
