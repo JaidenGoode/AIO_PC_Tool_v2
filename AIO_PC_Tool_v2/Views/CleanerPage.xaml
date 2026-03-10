@@ -3,134 +3,98 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="Cleaner" Background="#0A0A0A">
     
-    <Grid Margin="40,30">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
-        <!-- Header -->
-        <Grid Grid.Row="0" Margin="0,0,0,24">
-            <StackPanel>
-                <TextBlock FontSize="28" FontWeight="Bold">
-                    <Run Text="PC" Foreground="White"/>
-                    <Run Text="Cleaner" Foreground="#DC2626"/>
-                </TextBlock>
-                <TextBlock Text="Scan, select and remove junk files safely — no important files affected" FontSize="13" Foreground="#606060" Margin="0,4,0,0"/>
-            </StackPanel>
-            <StackPanel HorizontalAlignment="Right">
-                <TextBlock Text="TOTAL FREED" FontSize="10" Foreground="#505050" HorizontalAlignment="Right"/>
-                <TextBlock x:Name="TotalFreed" Text="0 GB" FontSize="24" Foreground="#DC2626" FontWeight="Bold"/>
-            </StackPanel>
-        </Grid>
-        
-        <!-- Scan Card -->
-        <Border Grid.Row="1" Background="#141414" CornerRadius="12" Padding="40,50" Margin="0,0,0,24" HorizontalAlignment="Center">
-            <StackPanel HorizontalAlignment="Center">
-                <Border Width="80" Height="80" CornerRadius="40" Background="#1A1A1A" HorizontalAlignment="Center" Margin="0,0,0,20">
-                    <TextBlock Text="🧹" FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-                <TextBlock x:Name="ScanStatus" Text="Ready to Scan" FontSize="18" Foreground="White" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                <TextBlock x:Name="ScanDescription" Text="Click Scan Now to analyse your system for temporary files, cache,&#x0a;logs and other safe-to-remove junk." FontSize="12" Foreground="#606060" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,8,0,20"/>
-                <Button x:Name="ScanButton" Click="Scan_Click" Style="{StaticResource PrimaryButtonStyle}" Padding="32,14">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="🔍" Margin="0,0,8,0"/>
-                        <TextBlock Text="Scan Now"/>
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-        </Border>
-        
-        <!-- Categories -->
-        <UniformGrid Grid.Row="2" Columns="4" Rows="2" Margin="0,0,0,20">
-            <Border Background="#141414" CornerRadius="8" Padding="16" Margin="0,0,8,8" Cursor="Hand">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <Ellipse Width="8" Height="8" Fill="#DC2626" Margin="0,0,8,0"/>
-                        <TextBlock Text="Temp Files" FontSize="13" Foreground="White" FontWeight="SemiBold"/>
-                    </StackPanel>
-                    <TextBlock Text="System &amp; app temp" FontSize="11" Foreground="#505050"/>
-                    <TextBlock x:Name="TempSize" Text="0 MB" FontSize="12" Foreground="#DC2626" Margin="0,8,0,0"/>
-                </StackPanel>
-            </Border>
-            <Border Background="#141414" CornerRadius="8" Padding="16" Margin="4,0,4,8" Cursor="Hand">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <Ellipse Width="8" Height="8" Fill="#DC2626" Margin="0,0,8,0"/>
-                        <TextBlock Text="Browser Cache" FontSize="13" Foreground="White" FontWeight="SemiBold"/>
-                    </StackPanel>
-                    <TextBlock Text="Chrome, Edge, Opera GX" FontSize="11" Foreground="#505050"/>
-                    <TextBlock x:Name="BrowserSize" Text="0 MB" FontSize="12" Foreground="#DC2626" Margin="0,8,0,0"/>
-                </StackPanel>
-            </Border>
-            <Border Background="#141414" CornerRadius="8" Padding="16" Margin="4,0,4,8" Cursor="Hand">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <Ellipse Width="8" Height="8" Fill="#DC2626" Margin="0,0,8,0"/>
-                        <TextBlock Text="Windows Update" FontSize="13" Foreground="White" FontWeight="SemiBold"/>
-                    </StackPanel>
-                    <TextBlock Text="Downloaded update files" FontSize="11" Foreground="#505050"/>
-                    <TextBlock x:Name="UpdateSize" Text="0 MB" FontSize="12" Foreground="#DC2626" Margin="0,8,0,0"/>
-                </StackPanel>
-            </Border>
-            <Border Background="#141414" CornerRadius="8" Padding="16" Margin="8,0,0,8" Cursor="Hand">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <Ellipse Width="8" Height="8" Fill="#DC2626" Margin="0,0,8,0"/>
-                        <TextBlock Text="Thumbnails" FontSize="13" Foreground="White" FontWeight="SemiBold"/>
-                    </StackPanel>
-                    <TextBlock Text="Image &amp; video thumbnails" FontSize="11" Foreground="#505050"/>
-                    <TextBlock x:Name="ThumbSize" Text="0 MB" FontSize="12" Foreground="#DC2626" Margin="0,8,0,0"/>
-                </StackPanel>
-            </Border>
-            <Border Background="#141414" CornerRadius="8" Padding="16" Margin="0,8,8,0" Cursor="Hand">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <Ellipse Width="8" Height="8" Fill="#DC2626" Margin="0,0,8,0"/>
-                        <TextBlock Text="Recycle Bin" FontSize="13" Foreground="White" FontWeight="SemiBold"/>
-                    </StackPanel>
-                    <TextBlock Text="Deleted files" FontSize="11" Foreground="#505050"/>
-                    <TextBlock x:Name="RecycleSize" Text="0 MB" FontSize="12" Foreground="#DC2626" Margin="0,8,0,0"/>
-                </StackPanel>
-            </Border>
-            <Border Background="#141414" CornerRadius="8" Padding="16" Margin="4,8,4,0" Cursor="Hand">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <Ellipse Width="8" Height="8" Fill="#DC2626" Margin="0,0,8,0"/>
-                        <TextBlock Text="Log Files" FontSize="13" Foreground="White" FontWeight="SemiBold"/>
-                    </StackPanel>
-                    <TextBlock Text="CBS, DISM, system logs" FontSize="11" Foreground="#505050"/>
-                    <TextBlock x:Name="LogSize" Text="0 MB" FontSize="12" Foreground="#DC2626" Margin="0,8,0,0"/>
-                </StackPanel>
-            </Border>
-        </UniformGrid>
-        
-        <!-- Last Cleaned -->
-        <Border Grid.Row="3" Background="#141414" CornerRadius="8" Padding="16">
+        <!-- Header Section -->
+        <Border Grid.Row="0" Background="#0A0A0A" Padding="40,30,40,0">
             <Grid>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="🕐" FontSize="14" Foreground="#22C55E" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Title -->
+                <Grid Grid.Row="0" Margin="0,0,0,20">
                     <StackPanel>
-                        <TextBlock Text="Last cleaned" FontSize="13" Foreground="White" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="LastCleanedTime" Text="Never" FontSize="11" Foreground="#505050"/>
+                        <TextBlock FontSize="28" FontWeight="Bold">
+                            <Run Text="PC" Foreground="White"/>
+                            <Run Text="Cleaner" Foreground="#DC2626"/>
+                        </TextBlock>
+                        <TextBlock Text="Advanced system cleaning • DirectX shaders • Browser cache • Gaming platforms" FontSize="13" Foreground="#606060" Margin="0,4,0,0"/>
                     </StackPanel>
-                </StackPanel>
-                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                    <StackPanel Margin="0,0,24,0">
-                        <TextBlock x:Name="LastCleanedSize" Text="0 GB" FontSize="18" Foreground="#22C55E" FontWeight="Bold"/>
-                        <TextBlock Text="freed" FontSize="10" Foreground="#505050"/>
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBlock Text="POTENTIAL SAVINGS" FontSize="10" Foreground="#505050" HorizontalAlignment="Right"/>
+                        <TextBlock x:Name="TotalSize" Text="Scan to detect" FontSize="22" Foreground="#DC2626" FontWeight="Bold"/>
                     </StackPanel>
-                    <Button x:Name="CleanButton" Content="Clean Now" Click="Clean_Click" Style="{StaticResource PrimaryButtonStyle}" IsEnabled="False"/>
-                </StackPanel>
+                </Grid>
+                
+                <!-- Stats Bar -->
+                <Border Grid.Row="1" Background="#141414" CornerRadius="10" Padding="20,16" Margin="0,0,0,20">
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <!-- Files Found -->
+                            <Border Background="#1A1A1A" CornerRadius="6" Padding="16,10" Margin="0,0,16,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📁" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                    <StackPanel>
+                                        <TextBlock x:Name="TotalFiles" Text="0" FontSize="16" Foreground="White" FontWeight="Bold"/>
+                                        <TextBlock Text="files found" FontSize="10" Foreground="#606060"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Categories Selected -->
+                            <Border Background="#1A1A1A" CornerRadius="6" Padding="16,10" Margin="0,0,16,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📦" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                    <StackPanel>
+                                        <TextBlock x:Name="CategoriesSelected" Text="0 / 0" FontSize="16" Foreground="White" FontWeight="Bold"/>
+                                        <TextBlock Text="categories selected" FontSize="10" Foreground="#606060"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Last Clean -->
+                            <Border Background="#1A1A1A" CornerRadius="6" Padding="16,10">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🕐" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                    <StackPanel>
+                                        <TextBlock x:Name="LastCleanTime" Text="Never" FontSize="16" Foreground="White" FontWeight="Bold"/>
+                                        <TextBlock Text="last cleaned" FontSize="10" Foreground="#606060"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                        
+                        <!-- Action Buttons -->
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="SelectAllBtn" Content="Select All" Click="SelectAll_Click" Style="{StaticResource SecondaryButtonStyle}" Padding="16,10" Margin="0,0,10,0"/>
+                            <Button x:Name="DeselectAllBtn" Content="Deselect All" Click="DeselectAll_Click" Style="{StaticResource SecondaryButtonStyle}" Padding="16,10" Margin="0,0,10,0"/>
+                            <Button x:Name="ScanButton" Click="Scan_Click" Style="{StaticResource PrimaryButtonStyle}" Padding="24,10">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="ScanIcon" Text="🔍" Margin="0,0,8,0"/>
+                                    <TextBlock x:Name="ScanText" Text="Scan System"/>
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="CleanButton" Click="Clean_Click" Style="{StaticResource PrimaryButtonStyle}" Padding="24,10" Margin="10,0,0,0" IsEnabled="False">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🧹" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Clean Now"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
         
-        <!-- Info -->
-        <Border Grid.Row="4" Margin="0,16,0,0">
-            <TextBlock Text="ℹ All categories are safe to clean. No personal files, documents, photos or important system files are touched. Only temporary, cache and log files are removed." FontSize="11" Foreground="#404040" TextWrapping="Wrap"/>
-        </Border>
+        <!-- Categories Grid -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="40,0,40,30">
+            <StackPanel x:Name="CategoriesContainer"/>
+        </ScrollViewer>
     </Grid>
 </Page>

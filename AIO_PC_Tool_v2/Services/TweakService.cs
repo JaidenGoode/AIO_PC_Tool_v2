@@ -16,7 +16,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "game_mode",
                     Title = "Enable Game Mode",
-                    Description = "Windows Game Mode prioritizes game processes and reduces background activity during gameplay for better FPS.",
+                    Description = "Windows Game Mode prioritizes game processes and reduces background activity during gameplay for better FPS and lower input lag.",
                     Category = "Gaming",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\GameBar",
@@ -28,7 +28,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_game_bar",
                     Title = "Disable Xbox Game Bar",
-                    Description = "Removes the Xbox overlay that can cause FPS drops and stuttering in games. Use third-party alternatives instead.",
+                    Description = "Removes the Xbox overlay that can cause FPS drops, stuttering, and increased input latency in games.",
                     Category = "Gaming",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR",
@@ -40,7 +40,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_game_dvr",
                     Title = "Disable Background Recording",
-                    Description = "Stops Windows from recording gameplay in the background. Frees up GPU resources for better performance.",
+                    Description = "Stops Windows from recording gameplay in the background. Frees up GPU resources and reduces CPU overhead.",
                     Category = "Gaming",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR",
@@ -51,11 +51,11 @@ namespace AIO_PC_Tool_v2.Services
                 new Tweak
                 {
                     Id = "hardware_gpu_scheduling",
-                    Title = "Hardware GPU Scheduling",
-                    Description = "Lets your GPU manage its own memory scheduling. Reduces input lag and improves frame times. Requires NVIDIA 10-series+ or AMD 5000+.",
+                    Title = "Hardware-Accelerated GPU Scheduling",
+                    Description = "Lets your GPU manage its own memory scheduling directly. Reduces input lag and improves frame times significantly.",
                     Category = "Gaming",
                     WindowsVersion = "10/11",
-                    Warning = "Requires compatible GPU. May cause issues on older hardware.",
+                    Warning = "Requires NVIDIA 10-series+ / AMD 5000+ / Intel Gen 10+",
                     RegistryPath = @"SYSTEM\CurrentControlSet\Control\GraphicsDrivers",
                     RegistryName = "HwSchMode",
                     OptimizedValue = 2,
@@ -65,7 +65,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_fullscreen_optimizations",
                     Title = "Disable Fullscreen Optimizations",
-                    Description = "Prevents Windows from applying compatibility features to fullscreen games. Reduces input lag in competitive games.",
+                    Description = "Prevents Windows from applying DWM composition to fullscreen games. Reduces input lag in competitive games.",
                     Category = "Gaming",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\GameConfigStore",
@@ -76,8 +76,8 @@ namespace AIO_PC_Tool_v2.Services
                 new Tweak
                 {
                     Id = "optimize_gaming_priority",
-                    Title = "Game Process Priority",
-                    Description = "Increases CPU priority for games, ensuring smoother gameplay during background tasks.",
+                    Title = "Boost Game Process Priority",
+                    Description = "Increases CPU scheduling priority for games, ensuring smoother gameplay even with background tasks.",
                     Category = "Gaming",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
@@ -88,14 +88,38 @@ namespace AIO_PC_Tool_v2.Services
                 new Tweak
                 {
                     Id = "gpu_priority",
-                    Title = "GPU Priority for Games",
-                    Description = "Allocates more GPU resources to games for consistent frame rates.",
+                    Title = "Maximum GPU Priority for Games",
+                    Description = "Allocates maximum GPU resources to games for consistent, high frame rates.",
                     Category = "Gaming",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
                     RegistryName = "GPU Priority",
                     OptimizedValue = 8,
                     DefaultValue = 2
+                },
+                new Tweak
+                {
+                    Id = "scheduling_category",
+                    Title = "High-Performance Scheduling",
+                    Description = "Sets games to use high-performance CPU scheduling category for better responsiveness.",
+                    Category = "Gaming",
+                    WindowsVersion = "10/11",
+                    RegistryPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
+                    RegistryName = "Scheduling Category",
+                    OptimizedValue = "High",
+                    DefaultValue = "Medium"
+                },
+                new Tweak
+                {
+                    Id = "sfio_priority",
+                    Title = "High-Priority SFIO for Games",
+                    Description = "Increases I/O priority for game processes, reducing load times and stuttering.",
+                    Category = "Gaming",
+                    WindowsVersion = "10/11",
+                    RegistryPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
+                    RegistryName = "SFIO Priority",
+                    OptimizedValue = "High",
+                    DefaultValue = "Normal"
                 },
 
                 // ============ PERFORMANCE TWEAKS ============
@@ -115,7 +139,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_prefetch",
                     Title = "Disable Prefetch",
-                    Description = "Disables app prefetching. Minimal benefit on SSDs, can improve boot times.",
+                    Description = "Disables application prefetching. Can improve boot times and reduce disk activity on SSDs.",
                     Category = "Performance",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters",
@@ -127,7 +151,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_hibernation",
                     Title = "Disable Hibernation",
-                    Description = "Disables hibernation and removes hiberfil.sys, freeing up disk space equal to your RAM. Sleep still works.",
+                    Description = "Disables hibernation and removes hiberfil.sys, freeing disk space equal to your RAM. Sleep still works.",
                     Category = "Performance",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SYSTEM\CurrentControlSet\Control\Power",
@@ -139,7 +163,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_fast_startup",
                     Title = "Disable Fast Startup",
-                    Description = "Disables hybrid shutdown. Fixes boot issues and is recommended for dual-boot systems.",
+                    Description = "Disables hybrid shutdown. Fixes boot issues and is recommended for dual-boot systems or when experiencing driver problems.",
                     Category = "Performance",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SYSTEM\CurrentControlSet\Control\Session Manager\Power",
@@ -151,7 +175,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "optimize_processor_scheduling",
                     Title = "Optimize CPU Scheduling",
-                    Description = "Prioritizes foreground applications for snappier response times.",
+                    Description = "Prioritizes foreground applications for snappier response times and better gaming performance.",
                     Category = "Performance",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SYSTEM\CurrentControlSet\Control\PriorityControl",
@@ -163,7 +187,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_transparency",
                     Title = "Disable Transparency Effects",
-                    Description = "Disables window transparency and blur. Improves performance on older hardware.",
+                    Description = "Disables window transparency and blur effects. Improves performance especially on integrated graphics.",
                     Category = "Performance",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize",
@@ -175,7 +199,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_animations",
                     Title = "Reduce Visual Animations",
-                    Description = "Minimizes window animations for faster UI response. Makes Windows feel snappier.",
+                    Description = "Minimizes window animations for faster UI response. Makes Windows feel significantly snappier.",
                     Category = "Performance",
                     WindowsVersion = "10/11",
                     RegistryPath = @"Control Panel\Desktop\WindowMetrics",
@@ -183,13 +207,25 @@ namespace AIO_PC_Tool_v2.Services
                     OptimizedValue = "0",
                     DefaultValue = "1"
                 },
+                new Tweak
+                {
+                    Id = "system_responsiveness",
+                    Title = "Maximize System Responsiveness",
+                    Description = "Reduces CPU time reserved for background tasks from 20% to 10% for better foreground performance.",
+                    Category = "Performance",
+                    WindowsVersion = "10/11",
+                    RegistryPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile",
+                    RegistryName = "SystemResponsiveness",
+                    OptimizedValue = 10,
+                    DefaultValue = 20
+                },
 
                 // ============ PRIVACY TWEAKS ============
                 new Tweak
                 {
                     Id = "disable_telemetry",
                     Title = "Disable Telemetry",
-                    Description = "Prevents Windows from sending diagnostic and usage data to Microsoft. Improves privacy.",
+                    Description = "Prevents Windows from sending diagnostic and usage data to Microsoft. Improves privacy and reduces background activity.",
                     Category = "Privacy",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
@@ -201,7 +237,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_advertising_id",
                     Title = "Disable Advertising ID",
-                    Description = "Stops apps from tracking you with a unique advertising identifier.",
+                    Description = "Stops apps from tracking you with a unique advertising identifier for targeted ads.",
                     Category = "Privacy",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo",
@@ -213,7 +249,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_activity_history",
                     Title = "Disable Activity History",
-                    Description = "Stops Windows from collecting your activity history and syncing it to Microsoft.",
+                    Description = "Stops Windows from collecting your activity history and syncing it to Microsoft cloud.",
                     Category = "Privacy",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Policies\Microsoft\Windows\System",
@@ -225,7 +261,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_feedback",
                     Title = "Disable Feedback Requests",
-                    Description = "Stops Windows from asking for feedback. Reduces interruptions.",
+                    Description = "Stops Windows from asking for feedback. Reduces interruptions and popups.",
                     Category = "Privacy",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Siuf\Rules",
@@ -237,7 +273,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_suggestions",
                     Title = "Disable App Suggestions",
-                    Description = "Removes suggested apps and ads from the Start menu.",
+                    Description = "Removes suggested apps and promotional content from the Start menu.",
                     Category = "Privacy",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
@@ -249,7 +285,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_tailored_experiences",
                     Title = "Disable Tailored Experiences",
-                    Description = "Stops Microsoft from personalizing tips and ads based on your data.",
+                    Description = "Stops Microsoft from personalizing tips, ads and recommendations based on your data.",
                     Category = "Privacy",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy",
@@ -257,13 +293,25 @@ namespace AIO_PC_Tool_v2.Services
                     OptimizedValue = 0,
                     DefaultValue = 1
                 },
+                new Tweak
+                {
+                    Id = "disable_location_tracking",
+                    Title = "Disable Location Tracking",
+                    Description = "Prevents Windows and apps from accessing your location data.",
+                    Category = "Privacy",
+                    WindowsVersion = "10/11",
+                    RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location",
+                    RegistryName = "Value",
+                    OptimizedValue = "Deny",
+                    DefaultValue = "Allow"
+                },
 
                 // ============ NETWORK TWEAKS ============
                 new Tweak
                 {
                     Id = "disable_nagle",
                     Title = "Disable Nagle's Algorithm",
-                    Description = "Reduces network latency by disabling TCP packet batching. Great for online gaming.",
+                    Description = "Reduces network latency by disabling TCP packet batching. Essential for online gaming and real-time applications.",
                     Category = "Network",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\MSMQ\Parameters",
@@ -275,7 +323,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_network_throttling",
                     Title = "Disable Network Throttling",
-                    Description = "Removes bandwidth throttling for multimedia applications. Improves streaming and downloads.",
+                    Description = "Removes Windows bandwidth throttling for multimedia applications. Improves streaming and download speeds.",
                     Category = "Network",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile",
@@ -283,13 +331,25 @@ namespace AIO_PC_Tool_v2.Services
                     OptimizedValue = -1,
                     DefaultValue = 10
                 },
+                new Tweak
+                {
+                    Id = "enable_large_mtu",
+                    Title = "Enable Large MTU Packets",
+                    Description = "Enables larger network packets for improved throughput on high-speed connections.",
+                    Category = "Network",
+                    WindowsVersion = "10/11",
+                    RegistryPath = @"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters",
+                    RegistryName = "EnablePMTUDiscovery",
+                    OptimizedValue = 1,
+                    DefaultValue = 0
+                },
 
                 // ============ VISUAL TWEAKS ============
                 new Tweak
                 {
                     Id = "show_file_extensions",
                     Title = "Show File Extensions",
-                    Description = "Shows file extensions for all files. Helps identify file types and avoid malware.",
+                    Description = "Shows file extensions for all files. Helps identify file types and avoid malware disguised as documents.",
                     Category = "Visual",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
@@ -301,7 +361,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "show_hidden_files",
                     Title = "Show Hidden Files",
-                    Description = "Shows hidden files and folders in File Explorer.",
+                    Description = "Shows hidden files and folders in File Explorer for better system visibility.",
                     Category = "Visual",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
@@ -327,7 +387,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_usb_suspend",
                     Title = "Disable USB Selective Suspend",
-                    Description = "Prevents USB devices from being suspended. Fixes USB disconnection issues.",
+                    Description = "Prevents USB devices from being suspended. Fixes USB disconnection issues with gaming peripherals.",
                     Category = "Power",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SYSTEM\CurrentControlSet\Services\USB",
@@ -339,7 +399,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_power_throttling",
                     Title = "Disable Power Throttling",
-                    Description = "Prevents Windows from throttling background apps. Ensures full performance.",
+                    Description = "Prevents Windows from throttling background applications. Ensures full CPU performance at all times.",
                     Category = "Power",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SYSTEM\CurrentControlSet\Control\Power\PowerThrottling",
@@ -347,13 +407,26 @@ namespace AIO_PC_Tool_v2.Services
                     OptimizedValue = 1,
                     DefaultValue = 0
                 },
+                new Tweak
+                {
+                    Id = "disable_core_parking",
+                    Title = "Disable CPU Core Parking",
+                    Description = "Keeps all CPU cores active instead of parking unused cores. Improves multi-threaded performance.",
+                    Category = "Power",
+                    WindowsVersion = "10/11",
+                    Warning = "May increase power consumption on laptops",
+                    RegistryPath = @"SYSTEM\CurrentControlSet\Control\Power\PowerSettings\54533251-82be-4824-96c1-47b60b740d00\0cc5b647-c1df-4637-891a-dec35c318583",
+                    RegistryName = "ValueMax",
+                    OptimizedValue = 0,
+                    DefaultValue = 100
+                },
 
                 // ============ SECURITY TWEAKS ============
                 new Tweak
                 {
                     Id = "disable_autorun",
                     Title = "Disable AutoRun",
-                    Description = "Prevents automatic execution from USB drives. Important security measure.",
+                    Description = "Prevents automatic execution from USB drives and CDs. Important security measure against malware.",
                     Category = "Security",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer",
@@ -365,7 +438,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_remote_assistance",
                     Title = "Disable Remote Assistance",
-                    Description = "Disables Windows Remote Assistance feature for better security.",
+                    Description = "Disables Windows Remote Assistance feature for better security against unauthorized access.",
                     Category = "Security",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SYSTEM\CurrentControlSet\Control\Remote Assistance",
@@ -379,7 +452,7 @@ namespace AIO_PC_Tool_v2.Services
                 {
                     Id = "disable_storage_sense",
                     Title = "Disable Storage Sense",
-                    Description = "Prevents automatic file deletion. Gives you full control over your files.",
+                    Description = "Prevents automatic file deletion. Gives you full control over your files and temporary data.",
                     Category = "Storage",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy",
@@ -390,12 +463,24 @@ namespace AIO_PC_Tool_v2.Services
                 new Tweak
                 {
                     Id = "optimize_ntfs",
-                    Title = "Optimize NTFS",
-                    Description = "Disables last access time updates for better disk performance.",
+                    Title = "Optimize NTFS Performance",
+                    Description = "Disables last access time updates for better disk performance. Reduces unnecessary disk writes.",
                     Category = "Storage",
                     WindowsVersion = "10/11",
                     RegistryPath = @"SYSTEM\CurrentControlSet\Control\FileSystem",
                     RegistryName = "NtfsDisableLastAccessUpdate",
+                    OptimizedValue = 1,
+                    DefaultValue = 0
+                },
+                new Tweak
+                {
+                    Id = "disable_8dot3_names",
+                    Title = "Disable 8.3 Filename Creation",
+                    Description = "Disables legacy DOS filename creation for faster file operations on NTFS drives.",
+                    Category = "Storage",
+                    WindowsVersion = "10/11",
+                    RegistryPath = @"SYSTEM\CurrentControlSet\Control\FileSystem",
+                    RegistryName = "NtfsDisable8dot3NameCreation",
                     OptimizedValue = 1,
                     DefaultValue = 0
                 }
@@ -413,16 +498,8 @@ namespace AIO_PC_Tool_v2.Services
                     var currentValue = key.GetValue(tweak.RegistryName);
                     if (currentValue != null)
                     {
-                        if (tweak.OptimizedValue is int intOpt && currentValue is int intCur)
-                        {
-                            tweak.IsActive = intCur == intOpt;
-                            return tweak.IsActive;
-                        }
-                        else if (tweak.OptimizedValue is string strOpt)
-                        {
-                            tweak.IsActive = currentValue.ToString() == strOpt;
-                            return tweak.IsActive;
-                        }
+                        tweak.IsActive = CompareValues(currentValue, tweak.OptimizedValue);
+                        return tweak.IsActive;
                     }
                 }
 
@@ -433,16 +510,8 @@ namespace AIO_PC_Tool_v2.Services
                     var currentValue = keyUser.GetValue(tweak.RegistryName);
                     if (currentValue != null)
                     {
-                        if (tweak.OptimizedValue is int intOpt && currentValue is int intCur)
-                        {
-                            tweak.IsActive = intCur == intOpt;
-                            return tweak.IsActive;
-                        }
-                        else if (tweak.OptimizedValue is string strOpt)
-                        {
-                            tweak.IsActive = currentValue.ToString() == strOpt;
-                            return tweak.IsActive;
-                        }
+                        tweak.IsActive = CompareValues(currentValue, tweak.OptimizedValue);
+                        return tweak.IsActive;
                     }
                 }
 
@@ -455,41 +524,56 @@ namespace AIO_PC_Tool_v2.Services
             return tweak.IsActive;
         }
 
+        private bool CompareValues(object? current, object? optimized)
+        {
+            if (current == null || optimized == null) return false;
+
+            // Handle different types
+            if (optimized is int intOpt)
+            {
+                if (current is int intCur) return intCur == intOpt;
+                if (int.TryParse(current.ToString(), out int parsed)) return parsed == intOpt;
+            }
+            else if (optimized is string strOpt)
+            {
+                return current.ToString()?.Equals(strOpt, StringComparison.OrdinalIgnoreCase) ?? false;
+            }
+
+            return current.Equals(optimized);
+        }
+
         public bool ApplyTweak(Tweak tweak)
         {
             try
             {
-                // Try HKLM first
-                using var key = Registry.LocalMachine.CreateSubKey(tweak.RegistryPath);
-                if (key != null && tweak.OptimizedValue != null)
+                // Try HKLM first (requires admin)
+                try
                 {
-                    if (tweak.OptimizedValue is int intValue)
-                        key.SetValue(tweak.RegistryName, intValue, RegistryValueKind.DWord);
-                    else if (tweak.OptimizedValue is string strValue)
-                        key.SetValue(tweak.RegistryName, strValue, RegistryValueKind.String);
-                    
+                    using var key = Registry.LocalMachine.CreateSubKey(tweak.RegistryPath);
+                    if (key != null && tweak.OptimizedValue != null)
+                    {
+                        SetRegistryValue(key, tweak.RegistryName, tweak.OptimizedValue);
+                        tweak.IsActive = true;
+                        return true;
+                    }
+                }
+                catch
+                {
+                    // Fall through to HKCU
+                }
+
+                // Try HKCU as fallback
+                using var keyUser = Registry.CurrentUser.CreateSubKey(tweak.RegistryPath);
+                if (keyUser != null && tweak.OptimizedValue != null)
+                {
+                    SetRegistryValue(keyUser, tweak.RegistryName, tweak.OptimizedValue);
                     tweak.IsActive = true;
                     return true;
                 }
             }
             catch
             {
-                // Try HKCU as fallback
-                try
-                {
-                    using var key = Registry.CurrentUser.CreateSubKey(tweak.RegistryPath);
-                    if (key != null && tweak.OptimizedValue != null)
-                    {
-                        if (tweak.OptimizedValue is int intValue)
-                            key.SetValue(tweak.RegistryName, intValue, RegistryValueKind.DWord);
-                        else if (tweak.OptimizedValue is string strValue)
-                            key.SetValue(tweak.RegistryName, strValue, RegistryValueKind.String);
-                        
-                        tweak.IsActive = true;
-                        return true;
-                    }
-                }
-                catch { }
+                return false;
             }
             return false;
         }
@@ -499,54 +583,61 @@ namespace AIO_PC_Tool_v2.Services
             try
             {
                 // Try HKLM first
-                using var key = Registry.LocalMachine.CreateSubKey(tweak.RegistryPath);
-                if (key != null)
-                {
-                    if (tweak.DefaultValue == null)
-                    {
-                        key.DeleteValue(tweak.RegistryName, false);
-                    }
-                    else if (tweak.DefaultValue is int intValue)
-                    {
-                        key.SetValue(tweak.RegistryName, intValue, RegistryValueKind.DWord);
-                    }
-                    else if (tweak.DefaultValue is string strValue)
-                    {
-                        key.SetValue(tweak.RegistryName, strValue, RegistryValueKind.String);
-                    }
-                    
-                    tweak.IsActive = false;
-                    return true;
-                }
-            }
-            catch
-            {
-                // Try HKCU as fallback
                 try
                 {
-                    using var key = Registry.CurrentUser.CreateSubKey(tweak.RegistryPath);
+                    using var key = Registry.LocalMachine.CreateSubKey(tweak.RegistryPath);
                     if (key != null)
                     {
                         if (tweak.DefaultValue == null)
                         {
                             key.DeleteValue(tweak.RegistryName, false);
                         }
-                        else if (tweak.DefaultValue is int intValue)
+                        else
                         {
-                            key.SetValue(tweak.RegistryName, intValue, RegistryValueKind.DWord);
+                            SetRegistryValue(key, tweak.RegistryName, tweak.DefaultValue);
                         }
-                        else if (tweak.DefaultValue is string strValue)
-                        {
-                            key.SetValue(tweak.RegistryName, strValue, RegistryValueKind.String);
-                        }
-                        
                         tweak.IsActive = false;
                         return true;
                     }
                 }
-                catch { }
+                catch
+                {
+                    // Fall through to HKCU
+                }
+
+                // Try HKCU as fallback
+                using var keyUser = Registry.CurrentUser.CreateSubKey(tweak.RegistryPath);
+                if (keyUser != null)
+                {
+                    if (tweak.DefaultValue == null)
+                    {
+                        keyUser.DeleteValue(tweak.RegistryName, false);
+                    }
+                    else
+                    {
+                        SetRegistryValue(keyUser, tweak.RegistryName, tweak.DefaultValue);
+                    }
+                    tweak.IsActive = false;
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
             }
             return false;
+        }
+
+        private void SetRegistryValue(RegistryKey key, string name, object value)
+        {
+            if (value is int intValue)
+            {
+                key.SetValue(name, intValue, RegistryValueKind.DWord);
+            }
+            else if (value is string strValue)
+            {
+                key.SetValue(name, strValue, RegistryValueKind.String);
+            }
         }
 
         public int GetActiveTweakCount(List<Tweak> tweaks)

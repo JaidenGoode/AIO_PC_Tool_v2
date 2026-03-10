@@ -1,6 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using AIO_PC_Tool_v2.Models;
 using AIO_PC_Tool_v2.Services;
 
@@ -11,6 +13,9 @@ namespace AIO_PC_Tool_v2.Views
         private readonly TweakService _tweakService;
         private List<Tweak> _allTweaks;
         private string _currentCategory = "All";
+        private Dictionary<string, Button> _categoryButtons = new();
+
+        private static readonly string[] Categories = { "All", "Gaming", "Performance", "Privacy", "Network", "Visual", "Power", "Security", "Storage" };
 
         public TweaksPage()
         {
@@ -18,7 +23,65 @@ namespace AIO_PC_Tool_v2.Views
             _tweakService = new TweakService();
             _allTweaks = new List<Tweak>();
             
+            BuildCategoryButtons();
             LoadTweaks();
+        }
+
+        private void BuildCategoryButtons()
+        {
+            CategoryButtons.Children.Clear();
+            _categoryButtons.Clear();
+
+            foreach (var category in Categories)
+            {
+                var btn = new Button
+                {
+                    Content = category,
+                    Tag = category,
+                    Background = category == "All" 
+                        ? new SolidColorBrush(Color.FromRgb(220, 38, 38)) 
+                        : Brushes.Transparent,
+                    Foreground = category == "All" 
+                        ? Brushes.White 
+                        : new SolidColorBrush(Color.FromRgb(128, 128, 128)),
+                    BorderThickness = new Thickness(0),
+                    Padding = new Thickness(14, 8, 14, 8),
+                    Cursor = Cursors.Hand,
+                    FontSize = 11,
+                    FontWeight = FontWeights.Medium,
+                    Margin = new Thickness(2, 0, 2, 0)
+                };
+
+                // Create the template for rounded corners
+                var template = new ControlTemplate(typeof(Button));
+                var border = new FrameworkElementFactory(typeof(Border));
+                border.SetBinding(Border.BackgroundProperty, new System.Windows.Data.Binding("Background") { RelativeSource = new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.TemplatedParent) });
+                border.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
+                border.SetValue(Border.PaddingProperty, new Thickness(14, 8, 14, 8));
+                
+                var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+                presenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+                presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+                border.AppendChild(presenter);
+                
+                template.VisualTree = border;
+                btn.Template = template;
+
+                btn.Click += Category_Click;
+                btn.MouseEnter += (s, e) => 
+                {
+                    if (_currentCategory != category)
+                        btn.Background = new SolidColorBrush(Color.FromRgb(37, 37, 37));
+                };
+                btn.MouseLeave += (s, e) => 
+                {
+                    if (_currentCategory != category)
+                        btn.Background = Brushes.Transparent;
+                };
+
+                _categoryButtons[category] = btn;
+                CategoryButtons.Children.Add(btn);
+            }
         }
 
         private void LoadTweaks()
@@ -32,9 +95,8 @@ namespace AIO_PC_Tool_v2.Views
                     try { _tweakService.CheckTweakStatus(tweak); } catch { }
                 }
                 
-                UpdateActiveCount();
+                UpdateCounts();
                 DisplayTweaks();
-                HighlightCategory("All");
             }
             catch (Exception ex)
             {
@@ -42,10 +104,11 @@ namespace AIO_PC_Tool_v2.Views
             }
         }
 
-        private void UpdateActiveCount()
+        private void UpdateCounts()
         {
             var activeCount = _allTweaks.Count(t => t.IsActive);
             ActiveCount.Text = activeCount.ToString();
+            TotalCount.Text = $" / {_allTweaks.Count}";
         }
 
         private void Category_Click(object sender, RoutedEventArgs e)
@@ -60,15 +123,18 @@ namespace AIO_PC_Tool_v2.Views
 
         private void HighlightCategory(string category)
         {
-            var buttons = new[] { CatAll, CatGaming, CatPerformance, CatPrivacy, CatNetwork, CatVisual, CatPower, CatSecurity, CatStorage };
-            foreach (var btn in buttons)
+            foreach (var kvp in _categoryButtons)
             {
-                btn.Background = btn.Tag?.ToString() == category 
-                    ? new SolidColorBrush(Color.FromRgb(220, 38, 38)) 
-                    : Brushes.Transparent;
-                btn.Foreground = btn.Tag?.ToString() == category 
-                    ? Brushes.White 
-                    : new SolidColorBrush(Color.FromRgb(128, 128, 128));
+                if (kvp.Key == category)
+                {
+                    kvp.Value.Background = new SolidColorBrush(Color.FromRgb(220, 38, 38));
+                    kvp.Value.Foreground = Brushes.White;
+                }
+                else
+                {
+                    kvp.Value.Background = Brushes.Transparent;
+                    kvp.Value.Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128));
+                }
             }
         }
 
@@ -80,9 +146,55 @@ namespace AIO_PC_Tool_v2.Views
                 ? _allTweaks 
                 : _allTweaks.Where(t => t.Category == _currentCategory);
 
-            foreach (var tweak in filtered)
+            // Group by category if showing all
+            if (_currentCategory == "All")
             {
-                TweaksList.Children.Add(CreateTweakCard(tweak));
+                var groups = filtered.GroupBy(t => t.Category).OrderBy(g => GetCategoryOrder(g.Key));
+                
+                foreach (var group in groups)
+                {
+                    // Category header
+                    var header = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 16, 0, 12) };
+                    header.Children.Add(new Ellipse
+                    {
+                        Width = 8,
+                        Height = 8,
+                        Fill = GetCategoryColor(group.Key),
+                        Margin = new Thickness(0, 0, 10, 0),
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+                    header.Children.Add(new TextBlock
+                    {
+                        Text = group.Key.ToUpper(),
+                        FontSize = 11,
+                        Foreground = new SolidColorBrush(Color.FromRgb(80, 80, 80)),
+                        FontWeight = FontWeights.Bold,
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+                    
+                    var activeInCat = group.Count(t => t.IsActive);
+                    header.Children.Add(new TextBlock
+                    {
+                        Text = $" • {activeInCat}/{group.Count()} active",
+                        FontSize = 11,
+                        Foreground = new SolidColorBrush(Color.FromRgb(60, 60, 60)),
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+                    
+                    TweaksList.Children.Add(header);
+
+                    foreach (var tweak in group)
+                    {
+                        TweaksList.Children.Add(CreateTweakCard(tweak));
+                    }
+                }
+            }
+            else
+            {
+                foreach (var tweak in filtered)
+                {
+                    TweaksList.Children.Add(CreateTweakCard(tweak));
+                }
             }
         }
 
@@ -92,9 +204,13 @@ namespace AIO_PC_Tool_v2.Views
             {
                 Background = new SolidColorBrush(Color.FromRgb(20, 20, 20)),
                 CornerRadius = new CornerRadius(10),
-                Padding = new Thickness(20),
-                Margin = new Thickness(0, 0, 0, 10)
+                Padding = new Thickness(20, 16, 20, 16),
+                Margin = new Thickness(0, 0, 0, 8)
             };
+
+            // Hover effect
+            card.MouseEnter += (s, e) => card.Background = new SolidColorBrush(Color.FromRgb(26, 26, 26));
+            card.MouseLeave += (s, e) => card.Background = new SolidColorBrush(Color.FromRgb(20, 20, 20));
 
             var grid = new Grid();
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -103,22 +219,23 @@ namespace AIO_PC_Tool_v2.Views
             // Left content
             var content = new StackPanel();
 
-            // Title row
-            var titleRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
+            // Title row with status indicator
+            var titleRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 6) };
             
-            // Status indicator
+            // Status dot
             var statusDot = new Ellipse
             {
                 Width = 8,
                 Height = 8,
                 Fill = tweak.IsActive 
                     ? new SolidColorBrush(Color.FromRgb(34, 197, 94)) 
-                    : new SolidColorBrush(Color.FromRgb(80, 80, 80)),
+                    : new SolidColorBrush(Color.FromRgb(60, 60, 60)),
                 Margin = new Thickness(0, 0, 10, 0),
                 VerticalAlignment = VerticalAlignment.Center
             };
             titleRow.Children.Add(statusDot);
 
+            // Title
             titleRow.Children.Add(new TextBlock 
             { 
                 Text = tweak.Title, 
@@ -128,33 +245,36 @@ namespace AIO_PC_Tool_v2.Views
                 VerticalAlignment = VerticalAlignment.Center
             });
             
-            // Category badge
-            var categoryBadge = new Border
+            // Category badge (only if showing All)
+            if (_currentCategory == "All")
             {
-                Background = GetCategoryColor(tweak.Category),
-                CornerRadius = new CornerRadius(4),
-                Padding = new Thickness(8, 3, 8, 3),
-                Margin = new Thickness(10, 0, 0, 0),
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            categoryBadge.Child = new TextBlock 
-            { 
-                Text = tweak.Category.ToUpper(), 
-                FontSize = 9, 
-                Foreground = Brushes.White,
-                FontWeight = FontWeights.Bold
-            };
-            titleRow.Children.Add(categoryBadge);
+                var categoryBadge = new Border
+                {
+                    Background = new SolidColorBrush(Color.FromArgb(40, GetCategoryColor(tweak.Category).Color.R, GetCategoryColor(tweak.Category).Color.G, GetCategoryColor(tweak.Category).Color.B)),
+                    CornerRadius = new CornerRadius(4),
+                    Padding = new Thickness(8, 3, 8, 3),
+                    Margin = new Thickness(10, 0, 0, 0),
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                categoryBadge.Child = new TextBlock 
+                { 
+                    Text = tweak.Category.ToUpper(), 
+                    FontSize = 9, 
+                    Foreground = GetCategoryColor(tweak.Category),
+                    FontWeight = FontWeights.Bold
+                };
+                titleRow.Children.Add(categoryBadge);
+            }
             
             // Status badge
             var statusBadge = new Border
             {
                 Background = tweak.IsActive 
                     ? new SolidColorBrush(Color.FromArgb(40, 34, 197, 94))
-                    : new SolidColorBrush(Color.FromRgb(40, 40, 40)),
+                    : new SolidColorBrush(Color.FromRgb(35, 35, 35)),
                 CornerRadius = new CornerRadius(4),
                 Padding = new Thickness(8, 3, 8, 3),
-                Margin = new Thickness(6, 0, 0, 0),
+                Margin = new Thickness(8, 0, 0, 0),
                 VerticalAlignment = VerticalAlignment.Center
             };
             statusBadge.Child = new TextBlock 
@@ -163,12 +283,12 @@ namespace AIO_PC_Tool_v2.Views
                 FontSize = 9, 
                 Foreground = tweak.IsActive 
                     ? new SolidColorBrush(Color.FromRgb(34, 197, 94))
-                    : new SolidColorBrush(Color.FromRgb(100, 100, 100)),
+                    : new SolidColorBrush(Color.FromRgb(90, 90, 90)),
                 FontWeight = FontWeights.Bold
             };
             titleRow.Children.Add(statusBadge);
 
-            // Windows version
+            // Windows version badge
             var winBadge = new Border
             {
                 Background = new SolidColorBrush(Color.FromRgb(30, 30, 30)),
@@ -181,7 +301,7 @@ namespace AIO_PC_Tool_v2.Views
             { 
                 Text = $"Win {tweak.WindowsVersion}", 
                 FontSize = 9, 
-                Foreground = new SolidColorBrush(Color.FromRgb(80, 80, 80)),
+                Foreground = new SolidColorBrush(Color.FromRgb(70, 70, 70)),
                 FontWeight = FontWeights.Medium
             };
             titleRow.Children.Add(winBadge);
@@ -193,13 +313,13 @@ namespace AIO_PC_Tool_v2.Views
             { 
                 Text = tweak.Description, 
                 FontSize = 12, 
-                Foreground = new SolidColorBrush(Color.FromRgb(140, 140, 140)),
+                Foreground = new SolidColorBrush(Color.FromRgb(130, 130, 130)),
                 TextWrapping = TextWrapping.Wrap,
                 Margin = new Thickness(18, 0, 0, 0),
                 MaxWidth = 700
             });
             
-            // Warning
+            // Warning if present
             if (!string.IsNullOrEmpty(tweak.Warning))
             {
                 var warningPanel = new StackPanel 
@@ -227,7 +347,7 @@ namespace AIO_PC_Tool_v2.Views
             Grid.SetColumn(content, 0);
             grid.Children.Add(content);
 
-            // Right buttons
+            // Right button
             var buttonPanel = new StackPanel 
             { 
                 Orientation = Orientation.Horizontal,
@@ -236,13 +356,13 @@ namespace AIO_PC_Tool_v2.Views
 
             if (!tweak.IsActive)
             {
-                var applyBtn = CreateButton("Apply", true, tweak);
+                var applyBtn = CreateActionButton("Apply", true, tweak);
                 applyBtn.Click += ApplyTweak_Click;
                 buttonPanel.Children.Add(applyBtn);
             }
             else
             {
-                var revertBtn = CreateButton("Revert", false, tweak);
+                var revertBtn = CreateActionButton("Revert", false, tweak);
                 revertBtn.Click += RevertTweak_Click;
                 buttonPanel.Children.Add(revertBtn);
             }
@@ -254,20 +374,55 @@ namespace AIO_PC_Tool_v2.Views
             return card;
         }
 
-        private Button CreateButton(string text, bool isPrimary, Tweak tweak)
+        private Button CreateActionButton(string text, bool isPrimary, Tweak tweak)
         {
-            return new Button
+            var btn = new Button
             {
                 Content = text,
                 Background = isPrimary 
                     ? new SolidColorBrush(Color.FromRgb(220, 38, 38))
                     : new SolidColorBrush(Color.FromRgb(40, 40, 40)),
-                Foreground = isPrimary ? Brushes.White : new SolidColorBrush(Color.FromRgb(160, 160, 160)),
+                Foreground = isPrimary 
+                    ? Brushes.White 
+                    : new SolidColorBrush(Color.FromRgb(160, 160, 160)),
                 BorderThickness = new Thickness(0),
                 Padding = new Thickness(20, 10, 20, 10),
-                Cursor = System.Windows.Input.Cursors.Hand,
+                Cursor = Cursors.Hand,
+                FontSize = 12,
+                FontWeight = FontWeights.SemiBold,
                 Tag = tweak
             };
+
+            // Create template with rounded corners
+            var template = new ControlTemplate(typeof(Button));
+            var border = new FrameworkElementFactory(typeof(Border));
+            border.SetBinding(Border.BackgroundProperty, new System.Windows.Data.Binding("Background") { RelativeSource = new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.TemplatedParent) });
+            border.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+            border.SetValue(Border.PaddingProperty, new Thickness(20, 10, 20, 10));
+            
+            var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+            presenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+            border.AppendChild(presenter);
+            
+            template.VisualTree = border;
+            btn.Template = template;
+
+            // Hover effects
+            btn.MouseEnter += (s, e) =>
+            {
+                btn.Background = isPrimary 
+                    ? new SolidColorBrush(Color.FromRgb(239, 68, 68))
+                    : new SolidColorBrush(Color.FromRgb(50, 50, 50));
+            };
+            btn.MouseLeave += (s, e) =>
+            {
+                btn.Background = isPrimary 
+                    ? new SolidColorBrush(Color.FromRgb(220, 38, 38))
+                    : new SolidColorBrush(Color.FromRgb(40, 40, 40));
+            };
+
+            return btn;
         }
 
         private SolidColorBrush GetCategoryColor(string category)
@@ -286,18 +441,41 @@ namespace AIO_PC_Tool_v2.Views
             };
         }
 
+        private int GetCategoryOrder(string category)
+        {
+            return category.ToLower() switch
+            {
+                "gaming" => 0,
+                "performance" => 1,
+                "privacy" => 2,
+                "network" => 3,
+                "visual" => 4,
+                "power" => 5,
+                "security" => 6,
+                "storage" => 7,
+                _ => 99
+            };
+        }
+
         private void ApplyTweak_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is Tweak tweak)
             {
-                if (_tweakService.ApplyTweak(tweak))
+                try
                 {
-                    UpdateActiveCount();
-                    DisplayTweaks();
+                    if (_tweakService.ApplyTweak(tweak))
+                    {
+                        UpdateCounts();
+                        DisplayTweaks();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Failed to apply tweak. Try running as Administrator.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to apply tweak. Try running as Administrator.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -306,14 +484,21 @@ namespace AIO_PC_Tool_v2.Views
         {
             if (sender is Button btn && btn.Tag is Tweak tweak)
             {
-                if (_tweakService.RevertTweak(tweak))
+                try
                 {
-                    UpdateActiveCount();
-                    DisplayTweaks();
+                    if (_tweakService.RevertTweak(tweak))
+                    {
+                        UpdateCounts();
+                        DisplayTweaks();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Failed to revert tweak. Try running as Administrator.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to revert tweak. Try running as Administrator.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -323,16 +508,36 @@ namespace AIO_PC_Tool_v2.Views
             var filtered = _currentCategory == "All" 
                 ? _allTweaks 
                 : _allTweaks.Where(t => t.Category == _currentCategory);
+            
+            var toApply = filtered.Where(t => !t.IsActive).ToList();
+            
+            if (toApply.Count == 0)
+            {
+                MessageBox.Show("All tweaks in this category are already applied!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Apply {toApply.Count} tweaks?\n\nThis will modify system settings. Run as Administrator for best results.",
+                "Confirm Apply All",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes) return;
                 
             int applied = 0;
-            foreach (var tweak in filtered.Where(t => !t.IsActive))
+            foreach (var tweak in toApply)
             {
-                if (_tweakService.ApplyTweak(tweak)) applied++;
+                try
+                {
+                    if (_tweakService.ApplyTweak(tweak)) applied++;
+                }
+                catch { }
             }
             
-            UpdateActiveCount();
+            UpdateCounts();
             DisplayTweaks();
-            MessageBox.Show($"Applied {applied} tweaks successfully!", "Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show($"Applied {applied} of {toApply.Count} tweaks successfully!", "Complete", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void RevertAll_Click(object sender, RoutedEventArgs e)
@@ -340,18 +545,36 @@ namespace AIO_PC_Tool_v2.Views
             var filtered = _currentCategory == "All" 
                 ? _allTweaks 
                 : _allTweaks.Where(t => t.Category == _currentCategory);
+            
+            var toRevert = filtered.Where(t => t.IsActive).ToList();
+            
+            if (toRevert.Count == 0)
+            {
+                MessageBox.Show("No tweaks in this category are currently applied!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Revert {toRevert.Count} tweaks to Windows defaults?",
+                "Confirm Revert All",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes) return;
                 
             int reverted = 0;
-            foreach (var tweak in filtered.Where(t => t.IsActive))
+            foreach (var tweak in toRevert)
             {
-                if (_tweakService.RevertTweak(tweak)) reverted++;
+                try
+                {
+                    if (_tweakService.RevertTweak(tweak)) reverted++;
+                }
+                catch { }
             }
             
-            UpdateActiveCount();
+            UpdateCounts();
             DisplayTweaks();
             MessageBox.Show($"Reverted {reverted} tweaks to defaults!", "Complete", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
-
-    public class Ellipse : System.Windows.Shapes.Ellipse { }
 }

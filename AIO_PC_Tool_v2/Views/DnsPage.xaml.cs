@@ -10,20 +10,46 @@ namespace AIO_PC_Tool_v2.Views
     {
         private readonly DnsService _dnsService;
         private string? _selectedProvider;
-        private readonly Dictionary<string, (string primary, string secondary)> _dnsServers = new()
-        {
-            { "Cloudflare", ("1.1.1.1", "1.0.0.1") },
-            { "Google", ("8.8.8.8", "8.8.4.4") },
-            { "OpenDNS", ("208.67.222.222", "208.67.220.220") },
-            { "Quad9", ("9.9.9.9", "149.112.112.112") },
-            { "AdGuard", ("94.140.14.14", "94.140.15.15") },
-            { "Default", ("Auto", "Auto") }
-        };
+        private Dictionary<string, Border> _cardBorders = new();
 
         public DnsPage()
         {
             InitializeComponent();
             _dnsService = new DnsService();
+            InitializeCards();
+        }
+
+        private void InitializeCards()
+        {
+            _cardBorders["Cloudflare"] = Card_Cloudflare;
+            _cardBorders["Google"] = Card_Google;
+            _cardBorders["OpenDNS"] = Card_OpenDNS;
+            _cardBorders["Quad9"] = Card_Quad9;
+            _cardBorders["AdGuard"] = Card_AdGuard;
+            _cardBorders["Default"] = Card_Default;
+
+            // Add hover effects
+            foreach (var kvp in _cardBorders)
+            {
+                var border = kvp.Value;
+                var provider = kvp.Key;
+                
+                border.MouseEnter += (s, e) =>
+                {
+                    if (provider != _selectedProvider)
+                    {
+                        border.Background = new SolidColorBrush(Color.FromRgb(26, 26, 26));
+                    }
+                };
+                
+                border.MouseLeave += (s, e) =>
+                {
+                    if (provider != _selectedProvider)
+                    {
+                        border.Background = new SolidColorBrush(Color.FromRgb(20, 20, 20));
+                    }
+                };
+            }
         }
 
         private void DnsCard_Click(object sender, MouseButtonEventArgs e)
@@ -31,59 +57,68 @@ namespace AIO_PC_Tool_v2.Views
             if (sender is Border border && border.Tag is string provider)
             {
                 _selectedProvider = provider;
+                UpdateCardSelection();
                 ApplyButton.IsEnabled = true;
-                StatusText.Text = $"{provider} selected — click Apply to change DNS";
+                StatusText.Text = $"Ready to apply {provider} DNS";
+            }
+        }
+
+        private void UpdateCardSelection()
+        {
+            foreach (var kvp in _cardBorders)
+            {
+                var border = kvp.Value;
+                var provider = kvp.Key;
                 
-                // Reset all card borders
-                Card_Cloudflare.BorderBrush = Brushes.Transparent;
-                Card_Cloudflare.BorderThickness = new Thickness(0);
-                Card_Google.BorderBrush = Brushes.Transparent;
-                Card_Google.BorderThickness = new Thickness(0);
-                Card_OpenDNS.BorderBrush = Brushes.Transparent;
-                Card_OpenDNS.BorderThickness = new Thickness(0);
-                Card_Quad9.BorderBrush = Brushes.Transparent;
-                Card_Quad9.BorderThickness = new Thickness(0);
-                Card_AdGuard.BorderBrush = Brushes.Transparent;
-                Card_AdGuard.BorderThickness = new Thickness(0);
-                Card_Default.BorderBrush = Brushes.Transparent;
-                Card_Default.BorderThickness = new Thickness(0);
-                
-                // Highlight selected
-                border.BorderBrush = new SolidColorBrush(Color.FromRgb(220, 38, 38));
-                border.BorderThickness = new Thickness(2);
+                if (provider == _selectedProvider)
+                {
+                    border.Background = new SolidColorBrush(Color.FromArgb(30, 220, 38, 38));
+                    border.BorderBrush = new SolidColorBrush(Color.FromRgb(220, 38, 38));
+                    border.BorderThickness = new Thickness(2);
+                }
+                else
+                {
+                    border.Background = new SolidColorBrush(Color.FromRgb(20, 20, 20));
+                    border.BorderBrush = null;
+                    border.BorderThickness = new Thickness(0);
+                }
             }
         }
 
         private void Apply_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedProvider == null) return;
+            if (string.IsNullOrEmpty(_selectedProvider))
+            {
+                MessageBox.Show("Please select a DNS provider first.", "No Selection", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             try
             {
                 if (_selectedProvider == "Default")
                 {
                     _dnsService.ResetToAutomatic();
-                    ActiveDns.Text = "Default";
+                    ActiveDns.Text = "Default (ISP)";
+                    StatusText.Text = "DNS reset to automatic (ISP default)";
+                    MessageBox.Show("DNS has been reset to automatic.\n\nYou may need to restart your browser.", "DNS Reset", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    var servers = _dnsServers[_selectedProvider];
-                    var provider = new Models.DnsProvider 
-                    { 
-                        Name = _selectedProvider,
-                        PrimaryDns = servers.primary,
-                        SecondaryDns = servers.secondary
-                    };
-                    _dnsService.SetDns(provider);
-                    ActiveDns.Text = _selectedProvider;
+                    var providers = _dnsService.GetProviders();
+                    var provider = providers.FirstOrDefault(p => p.Name.StartsWith(_selectedProvider));
+                    
+                    if (provider != null)
+                    {
+                        _dnsService.SetDns(provider);
+                        ActiveDns.Text = _selectedProvider;
+                        StatusText.Text = $"{_selectedProvider} DNS applied successfully";
+                        MessageBox.Show($"DNS changed to {_selectedProvider}!\n\nPrimary: {provider.PrimaryDns}\nSecondary: {provider.SecondaryDns}\n\nYou may need to restart your browser.", "DNS Changed", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                 }
-                
-                StatusText.Text = $"DNS changed to {_selectedProvider}";
-                MessageBox.Show($"DNS successfully changed to {_selectedProvider}!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to change DNS: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Failed to apply DNS: {ex.Message}\n\nMake sure you're running as Administrator.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

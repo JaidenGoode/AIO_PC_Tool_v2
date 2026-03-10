@@ -32,24 +32,34 @@ namespace AIO_PC_Tool_v2.Models
         public object? DefaultValue { get; set; }
     }
 
-    public class CleanerCategory : ObservableObject
+    public partial class CleanerCategory : ObservableObject
     {
-        private bool _isSelected;
-        public bool IsSelected
-        {
-            get => _isSelected;
-            set => SetProperty(ref _isSelected, value);
-        }
+        [ObservableProperty]
+        private bool isSelected = true;
+
+        [ObservableProperty]
+        private long size;
+
+        [ObservableProperty]
+        private int fileCount;
+
+        [ObservableProperty]
+        private bool isScanning;
 
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public long Size { get; set; }
-        public int FileCount { get; set; }
-        public string SizeHuman => FormatSize(Size);
+        public string Icon { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public bool IsSafe { get; set; } = true;
+        public bool IsRecycleBin { get; set; }
         public string[] Paths { get; set; } = Array.Empty<string>();
+        public string[]? FilePatterns { get; set; }
+
+        public string SizeHuman => FormatSize(Size);
 
         private static string FormatSize(long bytes)
         {
+            if (bytes == 0) return "0 B";
             string[] sizes = { "B", "KB", "MB", "GB", "TB" };
             int order = 0;
             double size = bytes;
@@ -70,6 +80,7 @@ namespace AIO_PC_Tool_v2.Models
 
         private static string FormatSize(long bytes)
         {
+            if (bytes == 0) return "0 B";
             string[] sizes = { "B", "KB", "MB", "GB", "TB" };
             int order = 0;
             double size = bytes;

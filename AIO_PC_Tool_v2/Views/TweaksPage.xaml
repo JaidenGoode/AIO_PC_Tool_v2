@@ -3,61 +3,65 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="Tweaks" Background="#0A0A0A">
     
-    <Grid Margin="40,30">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
-        <!-- Header -->
-        <Grid Grid.Row="0" Margin="0,0,0,20">
-            <StackPanel>
-                <TextBlock FontSize="28" FontWeight="Bold">
-                    <Run Text="System" Foreground="White"/>
-                    <Run Text="Tweaks" Foreground="#DC2626"/>
-                </TextBlock>
-                <TextBlock Text="Safe, reversible optimizations for gaming, performance &amp; privacy" FontSize="13" Foreground="#606060" Margin="0,4,0,0"/>
-            </StackPanel>
-            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                <Border Background="#14141" CornerRadius="8" Padding="16,10" Margin="0,0,10,0">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="⚡" Foreground="#22C55E" FontSize="14" Margin="0,0,8,0"/>
-                        <TextBlock x:Name="ActiveCount" Text="0" FontSize="14" Foreground="#22C55E" FontWeight="Bold"/>
-                        <TextBlock Text=" active" FontSize="14" Foreground="#606060"/>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </Grid>
-        
-        <!-- Controls -->
-        <Border Grid.Row="1" Background="#141414" CornerRadius="10" Padding="16" Margin="0,0,0,20">
+        <!-- Header Section -->
+        <Border Grid.Row="0" Background="#0A0A0A" Padding="40,30,40,0">
             <Grid>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="CATEGORY" FontSize="10" Foreground="#505050" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                    <Border Background="#0A0A0A" CornerRadius="6" Padding="4">
-                        <StackPanel Orientation="Horizontal">
-                            <Button x:Name="CatAll" Content="All" Click="Category_Click" Tag="All" Style="{StaticResource CategoryButtonStyle}"/>
-                            <Button x:Name="CatGaming" Content="Gaming" Click="Category_Click" Tag="Gaming" Style="{StaticResource CategoryButtonStyle}"/>
-                            <Button x:Name="CatPerformance" Content="Performance" Click="Category_Click" Tag="Performance" Style="{StaticResource CategoryButtonStyle}"/>
-                            <Button x:Name="CatPrivacy" Content="Privacy" Click="Category_Click" Tag="Privacy" Style="{StaticResource CategoryButtonStyle}"/>
-                            <Button x:Name="CatNetwork" Content="Network" Click="Category_Click" Tag="Network" Style="{StaticResource CategoryButtonStyle}"/>
-                            <Button x:Name="CatVisual" Content="Visual" Click="Category_Click" Tag="Visual" Style="{StaticResource CategoryButtonStyle}"/>
-                            <Button x:Name="CatPower" Content="Power" Click="Category_Click" Tag="Power" Style="{StaticResource CategoryButtonStyle}"/>
-                            <Button x:Name="CatSecurity" Content="Security" Click="Category_Click" Tag="Security" Style="{StaticResource CategoryButtonStyle}"/>
-                            <Button x:Name="CatStorage" Content="Storage" Click="Category_Click" Tag="Storage" Style="{StaticResource CategoryButtonStyle}"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Title Row -->
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock FontSize="28" FontWeight="Bold">
+                            <Run Text="System" Foreground="White"/>
+                            <Run Text="Tweaks" Foreground="#DC2626"/>
+                        </TextBlock>
+                        <TextBlock Text="Safe, reversible Windows optimizations for gaming, performance and privacy" FontSize="13" Foreground="#606060" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Border Background="#14141" CornerRadius="8" Padding="20,12">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚡" Foreground="#22C55E" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock x:Name="ActiveCount" Text="0" FontSize="20" Foreground="#22C55E" FontWeight="Bold"/>
+                                        <TextBlock x:Name="TotalCount" Text=" / 30" FontSize="20" Foreground="#505050" FontWeight="Bold"/>
+                                    </StackPanel>
+                                    <TextBlock Text="optimizations active" FontSize="10" Foreground="#606060"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+                
+                <!-- Controls Bar -->
+                <Border Grid.Row="1" Background="#141414" CornerRadius="10" Padding="16" Margin="0,0,0,20">
+                    <Grid>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="FILTER" FontSize="10" Foreground="#505050" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <Border Background="#0A0A0A" CornerRadius="6" Padding="4">
+                                <StackPanel x:Name="CategoryButtons" Orientation="Horizontal"/>
+                            </Border>
                         </StackPanel>
-                    </Border>
-                </StackPanel>
-                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                    <Button Content="Apply All" Click="ApplyAll_Click" Style="{StaticResource PrimaryButtonStyle}" Padding="20,10"/>
-                    <Button Content="Revert All" Click="RevertAll_Click" Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0" Padding="20,10"/>
-                </StackPanel>
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="ApplyAllBtn" Content="Apply All in Category" Click="ApplyAll_Click" Style="{StaticResource PrimaryButtonStyle}" Padding="20,10"/>
+                            <Button x:Name="RevertAllBtn" Content="Revert All in Category" Click="RevertAll_Click" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0" Padding="20,10"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
         
         <!-- Tweaks List -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="40,0,40,30">
             <StackPanel x:Name="TweaksList"/>
         </ScrollViewer>
     </Grid>
