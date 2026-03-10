@@ -1,7 +1,5 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using AIO_PC_Tool_v2.Models;
 using AIO_PC_Tool_v2.Services;
 
 namespace AIO_PC_Tool_v2.Views
@@ -9,97 +7,92 @@ namespace AIO_PC_Tool_v2.Views
     public partial class CleanerPage : Page
     {
         private readonly CleanerService _cleanerService;
-        private List<CleanerCategory> _categories;
+        private long _totalFound = 0;
 
         public CleanerPage()
         {
             InitializeComponent();
             _cleanerService = new CleanerService();
-            _categories = _cleanerService.GetCategories().ToList();
-            DisplayCategories();
-        }
-
-        private void DisplayCategories()
-        {
-            CategoriesList.Children.Clear();
-            
-            foreach (var category in _categories)
-            {
-                var card = new Border
-                {
-                    Background = new SolidColorBrush(Color.FromRgb(26, 26, 26)),
-                    CornerRadius = new CornerRadius(10),
-                    Padding = new Thickness(16),
-                    Margin = new Thickness(0, 0, 0, 8)
-                };
-
-                var grid = new Grid();
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-                var checkbox = new CheckBox 
-                { 
-                    IsChecked = category.IsSelected, 
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Tag = category
-                };
-                checkbox.Checked += (s, e) => category.IsSelected = true;
-                checkbox.Unchecked += (s, e) => category.IsSelected = false;
-                Grid.SetColumn(checkbox, 0);
-                grid.Children.Add(checkbox);
-
-                var info = new StackPanel { Margin = new Thickness(12, 0, 0, 0) };
-                info.Children.Add(new TextBlock { Text = category.Name, FontWeight = FontWeights.SemiBold, FontSize = 14, Foreground = Brushes.White });
-                info.Children.Add(new TextBlock { Text = category.Description, FontSize = 12, Foreground = new SolidColorBrush(Color.FromRgb(163, 163, 163)) });
-                Grid.SetColumn(info, 1);
-                grid.Children.Add(info);
-
-                var sizeText = new TextBlock 
-                { 
-                    Text = category.SizeHuman, 
-                    FontWeight = FontWeights.SemiBold, 
-                    FontSize = 14, 
-                    Foreground = new SolidColorBrush(Color.FromRgb(239, 68, 68)),
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                Grid.SetColumn(sizeText, 2);
-                grid.Children.Add(sizeText);
-
-                card.Child = grid;
-                CategoriesList.Children.Add(card);
-            }
         }
 
         private async void Scan_Click(object sender, RoutedEventArgs e)
         {
-            StatusText.Text = "Scanning...";
-            long total = 0;
-
-            foreach (var category in _categories)
+            ScanButton.IsEnabled = false;
+            ScanStatus.Text = "Scanning...";
+            ScanDescription.Text = "Please wait while we analyze your system...";
+            
+            try
             {
-                var (size, count) = await _cleanerService.ScanCategoryAsync(category);
-                total += size;
-            }
+                var categories = _cleanerService.GetCategories();
+                _totalFound = 0;
 
-            TotalSize.Text = FormatSize(total);
-            StatusText.Text = "Scan complete";
-            DisplayCategories();
+                foreach (var category in categories)
+                {
+                    await _cleanerService.ScanCategoryAsync(category);
+                    _totalFound += category.Size;
+                }
+
+                // Update UI with found sizes
+                var temp = categories.FirstOrDefault(c => c.Name.Contains("Temp"));
+                var browser = categories.FirstOrDefault(c => c.Name.Contains("Browser"));
+                var update = categories.FirstOrDefault(c => c.Name.Contains("Update"));
+                var thumb = categories.FirstOrDefault(c => c.Name.Contains("Thumbnail"));
+                var recycle = categories.FirstOrDefault(c => c.Name.Contains("Recycle"));
+
+                TempSize.Text = FormatSize(temp?.Size ?? 0);
+                BrowserSize.Text = FormatSize(browser?.Size ?? 0);
+                UpdateSize.Text = FormatSize(update?.Size ?? 0);
+                ThumbSize.Text = FormatSize(thumb?.Size ?? 0);
+                RecycleSize.Text = FormatSize(recycle?.Size ?? 0);
+
+                ScanStatus.Text = $"Found {FormatSize(_totalFound)}";
+                ScanDescription.Text = "Click Clean Now to remove selected junk files";
+                CleanButton.IsEnabled = _totalFound > 0;
+            }
+            catch (Exception ex)
+            {
+                ScanStatus.Text = "Scan failed";
+                ScanDescription.Text = ex.Message;
+            }
+            
+            ScanButton.IsEnabled = true;
         }
 
         private async void Clean_Click(object sender, RoutedEventArgs e)
         {
-            StatusText.Text = "Cleaning...";
-            long cleaned = 0;
-
-            foreach (var category in _categories.Where(c => c.IsSelected))
+            CleanButton.IsEnabled = false;
+            ScanStatus.Text = "Cleaning...";
+            
+            try
             {
-                cleaned += await _cleanerService.CleanCategoryAsync(category);
-            }
+                long cleaned = 0;
+                var categories = _cleanerService.GetCategories();
 
-            StatusText.Text = $"Cleaned {FormatSize(cleaned)}";
-            await Task.Delay(500);
-            Scan_Click(sender, e);
+                foreach (var category in categories)
+                {
+                    cleaned += await _cleanerService.CleanCategoryAsync(category);
+                }
+
+                TotalFreed.Text = FormatSize(cleaned);
+                LastCleanedSize.Text = FormatSize(cleaned);
+                LastCleanedTime.Text = DateTime.Now.ToString("MMM dd, yyyy 'at' HH:mm");
+                
+                ScanStatus.Text = "Cleaning Complete!";
+                ScanDescription.Text = $"Successfully freed {FormatSize(cleaned)} of disk space";
+                
+                // Reset sizes
+                TempSize.Text = "0 MB";
+                BrowserSize.Text = "0 MB";
+                UpdateSize.Text = "0 MB";
+                ThumbSize.Text = "0 MB";
+                RecycleSize.Text = "0 MB";
+                LogSize.Text = "0 MB";
+            }
+            catch (Exception ex)
+            {
+                ScanStatus.Text = "Clean failed";
+                ScanDescription.Text = ex.Message;
+            }
         }
 
         private string FormatSize(long bytes)

@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
-using AIO_PC_Tool_v2.Models;
 using AIO_PC_Tool_v2.Services;
 
 namespace AIO_PC_Tool_v2.Views
@@ -9,79 +9,82 @@ namespace AIO_PC_Tool_v2.Views
     public partial class DnsPage : Page
     {
         private readonly DnsService _dnsService;
-        private List<DnsProvider> _providers;
-        private DnsProvider? _selectedProvider;
+        private string? _selectedProvider;
+        private readonly Dictionary<string, (string primary, string secondary)> _dnsServers = new()
+        {
+            { "Cloudflare", ("1.1.1.1", "1.0.0.1") },
+            { "Google", ("8.8.8.8", "8.8.4.4") },
+            { "OpenDNS", ("208.67.222.222", "208.67.220.220") },
+            { "Quad9", ("9.9.9.9", "149.112.112.112") },
+            { "AdGuard", ("94.140.14.14", "94.140.15.15") },
+            { "Default", ("Auto", "Auto") }
+        };
 
         public DnsPage()
         {
             InitializeComponent();
             _dnsService = new DnsService();
-            _providers = _dnsService.GetProviders().ToList();
-            DisplayProviders();
         }
 
-        private void DisplayProviders()
+        private void DnsCard_Click(object sender, MouseButtonEventArgs e)
         {
-            ProvidersList.Children.Clear();
-            
-            foreach (var provider in _providers)
+            if (sender is Border border && border.Tag is string provider)
             {
-                var card = new Border
-                {
-                    Background = new SolidColorBrush(Color.FromRgb(26, 26, 26)),
-                    CornerRadius = new CornerRadius(10),
-                    Padding = new Thickness(16),
-                    Margin = new Thickness(0, 0, 0, 8),
-                    BorderBrush = _selectedProvider == provider ? new SolidColorBrush(Color.FromRgb(220, 38, 38)) : Brushes.Transparent,
-                    BorderThickness = new Thickness(2),
-                    Cursor = System.Windows.Input.Cursors.Hand,
-                    Tag = provider
-                };
-                card.MouseLeftButtonUp += (s, e) => 
-                {
-                    _selectedProvider = provider;
-                    DisplayProviders();
-                };
-
-                var content = new StackPanel();
-                content.Children.Add(new TextBlock { Text = provider.Name, FontWeight = FontWeights.SemiBold, FontSize = 15, Foreground = Brushes.White });
-                content.Children.Add(new TextBlock { Text = provider.Description, FontSize = 12, Foreground = new SolidColorBrush(Color.FromRgb(163, 163, 163)), Margin = new Thickness(0, 2, 0, 0) });
+                _selectedProvider = provider;
+                ApplyButton.IsEnabled = true;
+                StatusText.Text = $"{provider} selected — click Apply to change DNS";
                 
-                var dnsRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 8, 0, 0) };
+                // Reset all card borders
+                Card_Cloudflare.BorderBrush = Brushes.Transparent;
+                Card_Cloudflare.BorderThickness = new Thickness(0);
+                Card_Google.BorderBrush = Brushes.Transparent;
+                Card_Google.BorderThickness = new Thickness(0);
+                Card_OpenDNS.BorderBrush = Brushes.Transparent;
+                Card_OpenDNS.BorderThickness = new Thickness(0);
+                Card_Quad9.BorderBrush = Brushes.Transparent;
+                Card_Quad9.BorderThickness = new Thickness(0);
+                Card_AdGuard.BorderBrush = Brushes.Transparent;
+                Card_AdGuard.BorderThickness = new Thickness(0);
+                Card_Default.BorderBrush = Brushes.Transparent;
+                Card_Default.BorderThickness = new Thickness(0);
                 
-                var primary = new Border { Background = new SolidColorBrush(Color.FromRgb(37, 37, 37)), CornerRadius = new CornerRadius(4), Padding = new Thickness(8, 4, 8, 4) };
-                primary.Child = new TextBlock { Text = provider.PrimaryDns, FontSize = 12, Foreground = new SolidColorBrush(Color.FromRgb(115, 115, 115)), FontFamily = new FontFamily("Consolas") };
-                dnsRow.Children.Add(primary);
-                
-                var secondary = new Border { Background = new SolidColorBrush(Color.FromRgb(37, 37, 37)), CornerRadius = new CornerRadius(4), Padding = new Thickness(8, 4, 8, 4), Margin = new Thickness(8, 0, 0, 0) };
-                secondary.Child = new TextBlock { Text = provider.SecondaryDns, FontSize = 12, Foreground = new SolidColorBrush(Color.FromRgb(115, 115, 115)), FontFamily = new FontFamily("Consolas") };
-                dnsRow.Children.Add(secondary);
-                
-                content.Children.Add(dnsRow);
-                card.Child = content;
-                ProvidersList.Children.Add(card);
+                // Highlight selected
+                border.BorderBrush = new SolidColorBrush(Color.FromRgb(220, 38, 38));
+                border.BorderThickness = new Thickness(2);
             }
         }
 
         private void Apply_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedProvider != null)
-            {
-                _dnsService.SetDns(_selectedProvider);
-                MessageBox.Show($"DNS set to {_selectedProvider.Name}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                MessageBox.Show("Please select a DNS provider first", "No Selection", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
+            if (_selectedProvider == null) return;
 
-        private void Reset_Click(object sender, RoutedEventArgs e)
-        {
-            _dnsService.ResetToAutomatic();
-            _selectedProvider = null;
-            DisplayProviders();
-            MessageBox.Show("DNS reset to automatic (DHCP)", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                if (_selectedProvider == "Default")
+                {
+                    _dnsService.ResetToAutomatic();
+                    ActiveDns.Text = "Default";
+                }
+                else
+                {
+                    var servers = _dnsServers[_selectedProvider];
+                    var provider = new Models.DnsProvider 
+                    { 
+                        Name = _selectedProvider,
+                        PrimaryDns = servers.primary,
+                        SecondaryDns = servers.secondary
+                    };
+                    _dnsService.SetDns(provider);
+                    ActiveDns.Text = _selectedProvider;
+                }
+                
+                StatusText.Text = $"DNS changed to {_selectedProvider}";
+                MessageBox.Show($"DNS successfully changed to {_selectedProvider}!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to change DNS: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
