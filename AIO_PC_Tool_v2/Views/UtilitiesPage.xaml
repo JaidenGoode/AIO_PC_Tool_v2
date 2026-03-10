@@ -13,15 +13,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
         <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
             <TextBlock Text="Utilities" FontSize="28" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
-            <TextBlock Text="Quick access to system tools and commands" FontSize="14" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0"/>
+            <TextBlock Text="System repair tools and maintenance utilities" FontSize="14" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,0"/>
         </StackPanel>
         
         <!-- Featured: Chris Titus Tech Utility -->
@@ -39,94 +37,58 @@
                 </Grid.ColumnDefinitions>
                 
                 <StackPanel Grid.Column="0">
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <materialDesign:PackIcon Kind="Star" Width="24" Height="24" Foreground="#FFD700" VerticalAlignment="Center"/>
-                        <TextBlock Text="RECOMMENDED" FontSize="11" FontWeight="Bold" Foreground="White" Opacity="0.8" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                    </StackPanel>
-                    <TextBlock Text="Chris Titus Tech Windows Utility" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="Comprehensive Windows optimization tool with debloat, tweaks, and more. Opens in admin PowerShell." 
-                               FontSize="13" Foreground="White" Opacity="0.9" Margin="0,6,0,0" TextWrapping="Wrap" MaxWidth="500"/>
+                    <TextBlock Text="FEATURED" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF" Opacity="0.8"/>
+                    <TextBlock Text="Chris Titus Tech Utility" FontSize="20" FontWeight="Bold" Foreground="White" Margin="0,4,0,0"/>
+                    <TextBlock Text="The ultimate Windows utility script for debloating, installing programs, and optimizing your system. Runs the official CTT winutil script with admin privileges." 
+                               FontSize="13" Foreground="White" Opacity="0.9" TextWrapping="Wrap" MaxWidth="500" Margin="0,8,0,0"/>
                 </StackPanel>
                 
-                <Button Grid.Column="1" 
-                        Content="LAUNCH" 
-                        Command="{Binding RunUtilityCommand}"
-                        CommandParameter="ctt-utility"
+                <Button Grid.Column="1" Content="Launch CTT Utility" 
+                        Command="{Binding RunChrisTitusCommand}"
                         Style="{StaticResource MaterialDesignFlatMidBgButton}"
-                        Background="White"
-                        Foreground="#7C3AED"
-                        FontWeight="Bold"
-                        Padding="24,12"
+                        Background="White" Foreground="#7C3AED"
+                        FontWeight="Bold" Padding="24,12"
                         VerticalAlignment="Center"/>
             </Grid>
         </Border>
         
-        <!-- Category Filter -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,16">
-            <ComboBox ItemsSource="{Binding Categories}" 
-                      SelectedItem="{Binding SelectedCategory}"
-                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                      Width="180"
-                      materialDesign:HintAssist.Hint="Category"/>
-        </StackPanel>
-        
         <!-- Utilities Grid -->
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding FilteredUtilities}">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Utilities}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid Columns="3"/>
+                        <UniformGrid Columns="2"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Background="{StaticResource BackgroundCard}" CornerRadius="10" Padding="16" Margin="0,0,12,12" Cursor="Hand"
-                                Visibility="{Binding Id, Converter={StaticResource HideCttConverter}}">
+                        <Border Background="{StaticResource BackgroundCard}" CornerRadius="10" Padding="16" Margin="0,0,8,8">
                             <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
                                 
-                                <StackPanel Grid.Row="0" Margin="0,0,0,8">
-                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource TextPrimary}"/>
-                                    <Border Background="{StaticResource BackgroundCardHover}" CornerRadius="4" Padding="6,2" Margin="0,6,0,0" HorizontalAlignment="Left">
-                                        <TextBlock Text="{Binding Category}" FontSize="10" Foreground="{StaticResource TextSecondary}" FontWeight="Medium"/>
-                                    </Border>
+                                <StackPanel Grid.Column="0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource TextPrimary}"/>
+                                        <Border CornerRadius="4" Padding="6,2" Margin="8,0,0,0" Background="{StaticResource BackgroundCardHover}">
+                                            <TextBlock Text="{Binding Category}" FontSize="10" Foreground="{StaticResource TextMuted}"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap"/>
                                 </StackPanel>
                                 
-                                <TextBlock Grid.Row="1" Text="{Binding Description}" FontSize="12" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" Margin="0,0,0,12"/>
-                                
-                                <StackPanel Grid.Row="2" Orientation="Horizontal">
-                                    <Button Content="Run" 
-                                            Command="{Binding DataContext.RunUtilityCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                            CommandParameter="{Binding Id}"
-                                            Style="{StaticResource MaterialDesignFlatMidBgButton}"
-                                            Background="{StaticResource AccentPrimary}"
-                                            Foreground="White"
-                                            Padding="16,6"/>
-                                    
-                                    <Border Visibility="{Binding RequiresRestart, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                            Background="#F9731620" CornerRadius="4" Padding="6,4" Margin="8,0,0,0" VerticalAlignment="Center">
-                                        <TextBlock Text="Restart" FontSize="10" Foreground="#F97316" FontWeight="Medium"/>
-                                    </Border>
-                                </StackPanel>
+                                <Button Grid.Column="1" Content="Run"
+                                        Command="{Binding DataContext.RunUtilityCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        VerticalAlignment="Center" Padding="16,8"/>
                             </Grid>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-        
-        <!-- Status Bar -->
-        <Border Grid.Row="4" Background="{StaticResource BackgroundCard}" CornerRadius="8" Padding="12" Margin="0,16,0,0">
-            <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="Information" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding StatusMessage}" FontSize="13" Foreground="{StaticResource TextSecondary}" Margin="8,0,0,0" VerticalAlignment="Center"/>
-                <ProgressBar IsIndeterminate="True" Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}" 
-                             Style="{StaticResource MaterialDesignCircularProgressBar}" Width="20" Height="20" Margin="16,0,0,0"/>
-            </StackPanel>
-        </Border>
     </Grid>
 </Page>

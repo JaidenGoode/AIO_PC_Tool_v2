@@ -1,691 +1,317 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using AIO_PC_Tool_v2.Services;
 using AIO_PC_Tool_v2.Models;
-using Microsoft.Extensions.DependencyInjection;
+using AIO_PC_Tool_v2.Services;
+using AIO_PC_Tool_v2.Helpers;
 using System.Collections.ObjectModel;
+using System.Windows.Threading;
 
-namespace AIO_PC_Tool_v2.ViewModels;
-
-public partial class MainViewModel : ObservableObject
+namespace AIO_PC_Tool_v2.ViewModels
 {
-    [ObservableProperty] private string _currentPage = "Dashboard";
-    [ObservableProperty] private bool _isLoading;
-    [ObservableProperty] private string _statusMessage = "Ready";
-
-    [RelayCommand]
-    private void NavigateTo(string page)
+    public partial class DashboardViewModel : ObservableObject
     {
-        CurrentPage = page;
-    }
-}
+        private readonly HardwareMonitorService _hardwareService;
+        private readonly DispatcherTimer _timer;
 
-public partial class DashboardViewModel : ObservableObject
-{
-    private readonly IHardwareMonitorService _hardwareService;
-    private readonly ITweakService _tweakService;
+        [ObservableProperty]
+        private SystemInfo systemInfo = new();
 
-    [ObservableProperty] private SystemInfo _systemInfo = new();
-    [ObservableProperty] private double _cpuUsage;
-    [ObservableProperty] private double _ramUsage;
-    [ObservableProperty] private double _gpuUsage;
-    [ObservableProperty] private double _cpuTemp;
-    [ObservableProperty] private double _gpuTemp;
-    [ObservableProperty] private int _activeTweaks;
-    [ObservableProperty] private int _totalTweaks;
-    [ObservableProperty] private bool _isMonitoring;
-    [ObservableProperty] private string _monitorButtonText = "Start Monitoring";
-
-    public DashboardViewModel()
-    {
-        _hardwareService = App.Services.GetRequiredService<IHardwareMonitorService>();
-        _tweakService = App.Services.GetRequiredService<ITweakService>();
-        
-        _hardwareService.UsageUpdated += OnUsageUpdated;
-        
-        SystemInfo = _hardwareService.GetSystemInfo();
-        TotalTweaks = _tweakService.GetTotalTweaksCount();
-        
-        // Auto-detect tweaks on load
-        _ = DetectTweaksAsync();
-    }
-
-    private void OnUsageUpdated(object? sender, SystemInfo info)
-    {
-        CpuUsage = info.Cpu.Usage;
-        RamUsage = info.Memory.UsagePercent;
-        GpuUsage = info.Gpu.Usage;
-        CpuTemp = info.Cpu.Temperature;
-        GpuTemp = info.Gpu.Temperature;
-    }
-
-    [RelayCommand]
-    private void ToggleMonitoring()
-    {
-        if (IsMonitoring)
+        public DashboardViewModel()
         {
-            _hardwareService.StopMonitoring();
-            IsMonitoring = false;
-            MonitorButtonText = "Start Monitoring";
+            _hardwareService = new HardwareMonitorService();
+            _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _timer.Tick += (s, e) => UpdateSystemInfo();
+            _timer.Start();
+            UpdateSystemInfo();
         }
-        else
+
+        private void UpdateSystemInfo()
         {
-            _hardwareService.StartMonitoring();
-            IsMonitoring = true;
-            MonitorButtonText = "Stop Monitoring";
+            SystemInfo = _hardwareService.GetSystemInfo();
         }
     }
 
-    [RelayCommand]
-    private async Task DetectTweaksAsync()
+    public partial class TweaksViewModel : ObservableObject
     {
-        await _tweakService.DetectAllTweaksAsync();
-        ActiveTweaks = _tweakService.GetActiveTweaksCount();
-    }
-}
+        private readonly TweakService _tweakService;
 
-public partial class TweaksViewModel : ObservableObject
-{
-    private readonly ITweakService _tweakService;
+        [ObservableProperty]
+        private ObservableCollection<Tweak> tweaks = new();
 
-    [ObservableProperty] private ObservableCollection<TweakItemViewModel> _tweaks = new();
-    [ObservableProperty] private ObservableCollection<TweakItemViewModel> _filteredTweaks = new();
-    [ObservableProperty] private string _selectedCategory = "all";
-    [ObservableProperty] private string _searchQuery = string.Empty;
-    [ObservableProperty] private bool _isApplying;
-    [ObservableProperty] private string _statusMessage = "Detecting current system state...";
-    [ObservableProperty] private int _optimizedCount;
-    [ObservableProperty] private int _totalCount;
-    [ObservableProperty] private bool _isDetecting;
+        [ObservableProperty]
+        private ObservableCollection<Tweak> filteredTweaks = new();
 
-    public List<string> Categories { get; } = new() 
-    { 
-        "all", "privacy", "performance", "gaming", "system", "network", "services" 
-    };
+        [ObservableProperty]
+        private string searchText = string.Empty;
 
-    public TweaksViewModel()
-    {
-        _tweakService = App.Services.GetRequiredService<ITweakService>();
-        _tweakService.TweakStateChanged += OnTweakStateChanged;
-        
-        // Initialize and auto-detect
-        _ = InitializeAsync();
-    }
+        [ObservableProperty]
+        private string selectedCategory = "All";
 
-    private async Task InitializeAsync()
-    {
-        IsDetecting = true;
-        StatusMessage = "Detecting current system state...";
-        
-        // Load tweaks
-        var tweaksList = _tweakService.GetAllTweaks();
-        TotalCount = tweaksList.Count;
-        
-        foreach (var tweak in tweaksList)
+        [ObservableProperty]
+        private Tweak? selectedTweak;
+
+        public ObservableCollection<string> Categories { get; } = new()
         {
-            Tweaks.Add(new TweakItemViewModel(tweak, this));
-        }
-        
-        // Auto-detect all states
-        await _tweakService.DetectAllTweaksAsync();
-        
-        // Update UI
-        UpdateFilteredTweaks();
-        UpdateCounts();
-        
-        IsDetecting = false;
-        StatusMessage = $"{OptimizedCount} of {TotalCount} optimizations active";
-    }
-
-    private void OnTweakStateChanged(object? sender, TweakStateChangedEventArgs e)
-    {
-        UpdateCounts();
-        var status = e.NewState ? "OPTIMIZED" : "DEFAULT";
-        StatusMessage = $"{e.Tweak.Title}: {status}";
-    }
-
-    private void UpdateCounts()
-    {
-        OptimizedCount = _tweakService.GetActiveTweaksCount();
-        
-        // Update individual items
-        foreach (var item in Tweaks)
-        {
-            item.RefreshState();
-        }
-    }
-
-    partial void OnSelectedCategoryChanged(string value) => UpdateFilteredTweaks();
-    partial void OnSearchQueryChanged(string value) => UpdateFilteredTweaks();
-
-    private void UpdateFilteredTweaks()
-    {
-        var filtered = Tweaks.AsEnumerable();
-        
-        if (SelectedCategory != "all")
-            filtered = filtered.Where(t => t.Category.Equals(SelectedCategory, StringComparison.OrdinalIgnoreCase));
-        
-        if (!string.IsNullOrEmpty(SearchQuery))
-            filtered = filtered.Where(t => 
-                t.Title.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
-                t.Description.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
-        
-        FilteredTweaks = new ObservableCollection<TweakItemViewModel>(filtered);
-    }
-
-    [RelayCommand]
-    private async Task ApplyPresetAsync(string preset)
-    {
-        IsApplying = true;
-        StatusMessage = $"Applying {preset} preset...";
-        
-        var tweaksToApply = preset switch
-        {
-            "gaming" => Tweaks.Where(t => t.Category == "gaming" && !t.IsActive),
-            "privacy" => Tweaks.Where(t => t.Category == "privacy" && !t.IsActive),
-            "performance" => Tweaks.Where(t => t.Category == "performance" && !t.IsActive),
-            _ => Enumerable.Empty<TweakItemViewModel>()
+            "All", "Privacy", "Performance", "Gaming", "Visual", "Network", "Power", "Security", "Storage"
         };
 
-        foreach (var tweak in tweaksToApply.ToList())
+        public TweaksViewModel()
         {
-            await tweak.ToggleAsync();
-        }
-        
-        UpdateCounts();
-        StatusMessage = $"{preset} preset applied";
-        IsApplying = false;
-    }
-
-    [RelayCommand]
-    private async Task DetectAllAsync()
-    {
-        IsDetecting = true;
-        StatusMessage = "Re-detecting all tweaks...";
-        
-        await _tweakService.DetectAllTweaksAsync();
-        
-        UpdateCounts();
-        UpdateFilteredTweaks();
-        
-        IsDetecting = false;
-        StatusMessage = $"{OptimizedCount} of {TotalCount} optimizations active";
-    }
-
-    public async Task ApplyTweakAsync(Tweak tweak, bool enable)
-    {
-        IsApplying = true;
-        var (success, message) = await _tweakService.ApplyTweakAsync(tweak, enable);
-        StatusMessage = message;
-        IsApplying = false;
-    }
-}
-
-public partial class TweakItemViewModel : ObservableObject
-{
-    private readonly Tweak _tweak;
-    private readonly TweaksViewModel _parent;
-
-    public int Id => _tweak.Id;
-    public string Title => _tweak.Title;
-    public string Description => _tweak.Description;
-    public string Category => _tweak.Category;
-    public string? Warning => _tweak.Warning;
-    public string? FeatureBreaks => _tweak.FeatureBreaks;
-
-    [ObservableProperty] private bool _isActive;
-    [ObservableProperty] private string _statusText = "DEFAULT";
-    [ObservableProperty] private bool _isApplying;
-
-    public TweakItemViewModel(Tweak tweak, TweaksViewModel parent)
-    {
-        _tweak = tweak;
-        _parent = parent;
-        RefreshState();
-    }
-
-    public void RefreshState()
-    {
-        IsActive = _tweak.IsActive;
-        StatusText = _tweak.IsActive ? "OPTIMIZED" : "DEFAULT";
-    }
-
-    [RelayCommand]
-    public async Task ToggleAsync()
-    {
-        IsApplying = true;
-        await _parent.ApplyTweakAsync(_tweak, !_tweak.IsActive);
-        RefreshState();
-        IsApplying = false;
-    }
-}
-
-public partial class CleanerViewModel : ObservableObject
-{
-    private readonly ICleanerService _cleanerService;
-
-    [ObservableProperty] private ObservableCollection<CleanCategoryViewModel> _categories = new();
-    [ObservableProperty] private bool _isScanning;
-    [ObservableProperty] private bool _isCleaning;
-    [ObservableProperty] private string _totalSize = "0 B";
-    [ObservableProperty] private int _totalFiles;
-    [ObservableProperty] private string _statusMessage = "Click 'Scan' to analyze your system";
-    [ObservableProperty] private ObservableCollection<CleaningHistory> _history = new();
-    [ObservableProperty] private bool _hasScanned;
-
-    public CleanerViewModel()
-    {
-        _cleanerService = App.Services.GetRequiredService<ICleanerService>();
-        _ = LoadHistoryAsync();
-    }
-
-    private async Task LoadHistoryAsync()
-    {
-        var historyList = await _cleanerService.GetHistoryAsync();
-        History = new ObservableCollection<CleaningHistory>(historyList.TakeLast(5).Reverse());
-    }
-
-    [RelayCommand]
-    private async Task ScanAsync()
-    {
-        IsScanning = true;
-        StatusMessage = "Scanning system...";
-        Categories.Clear();
-        
-        var progress = new Progress<string>(msg => StatusMessage = msg);
-        var results = await _cleanerService.ScanAsync(progress);
-        
-        foreach (var cat in results.Where(c => c.Found))
-        {
-            Categories.Add(new CleanCategoryViewModel(cat));
-        }
-        
-        TotalSize = FormatSize(_cleanerService.GetTotalCleanableSize());
-        TotalFiles = _cleanerService.GetTotalCleanableFiles();
-        
-        StatusMessage = $"Found {TotalSize} in {TotalFiles} files";
-        IsScanning = false;
-        HasScanned = true;
-    }
-
-    [RelayCommand]
-    private async Task CleanAsync()
-    {
-        var selected = Categories.Where(c => c.IsSelected).Select(c => c.Id).ToList();
-        if (selected.Count == 0)
-        {
-            StatusMessage = "Select categories to clean";
-            return;
+            _tweakService = new TweakService();
+            LoadTweaks();
         }
 
-        IsCleaning = true;
-        StatusMessage = "Cleaning...";
-        
-        var progress = new Progress<string>(msg => StatusMessage = msg);
-        var result = await _cleanerService.CleanAsync(selected, progress);
-        
-        if (result.Errors.Any())
+        private void LoadTweaks()
         {
-            StatusMessage = $"Cleaned {result.FreedHuman}. Some errors occurred.";
-        }
-        else
-        {
-            StatusMessage = $"Successfully freed {result.FreedHuman} from {result.CategoriesCleaned} categories";
-        }
-        
-        IsCleaning = false;
-        
-        await LoadHistoryAsync();
-        await ScanAsync();
-    }
-
-    [RelayCommand]
-    private void SelectAll()
-    {
-        foreach (var cat in Categories)
-            cat.IsSelected = true;
-    }
-
-    [RelayCommand]
-    private void DeselectAll()
-    {
-        foreach (var cat in Categories)
-            cat.IsSelected = false;
-    }
-
-    private static string FormatSize(long bytes)
-    {
-        if (bytes < 1024) return $"{bytes} B";
-        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
-        if (bytes < 1024 * 1024 * 1024) return $"{bytes / (1024.0 * 1024):F1} MB";
-        return $"{bytes / (1024.0 * 1024 * 1024):F2} GB";
-    }
-}
-
-public partial class CleanCategoryViewModel : ObservableObject
-{
-    private readonly CleanCategory _category;
-
-    public string Id => _category.Id;
-    public string Name => _category.Name;
-    public string Description => _category.Description;
-    public string SizeHuman => _category.SizeHuman;
-    public int FileCount => _category.FileCount;
-
-    [ObservableProperty] private bool _isSelected = true;
-
-    public CleanCategoryViewModel(CleanCategory category)
-    {
-        _category = category;
-    }
-}
-
-public partial class DnsViewModel : ObservableObject
-{
-    private readonly IDnsService _dnsService;
-
-    [ObservableProperty] private ObservableCollection<DnsProviderViewModel> _providers = new();
-    [ObservableProperty] private string? _currentProvider;
-    [ObservableProperty] private bool _isApplying;
-    [ObservableProperty] private string _statusMessage = "Select a DNS provider";
-
-    public DnsViewModel()
-    {
-        _dnsService = App.Services.GetRequiredService<IDnsService>();
-        Initialize();
-    }
-
-    private async void Initialize()
-    {
-        foreach (var provider in _dnsService.GetProviders())
-        {
-            Providers.Add(new DnsProviderViewModel(provider, this));
-        }
-        
-        CurrentProvider = await _dnsService.GetCurrentProviderAsync();
-        UpdateActiveStates();
-    }
-
-    private void UpdateActiveStates()
-    {
-        foreach (var p in Providers)
-        {
-            p.IsActive = p.Id == CurrentProvider;
-        }
-    }
-
-    public async Task SetDnsAsync(string providerId)
-    {
-        IsApplying = true;
-        StatusMessage = "Applying DNS settings...";
-        
-        var success = await _dnsService.SetDnsAsync(providerId);
-        
-        if (success)
-        {
-            CurrentProvider = providerId;
-            UpdateActiveStates();
-            var provider = Providers.FirstOrDefault(p => p.Id == providerId);
-            StatusMessage = $"DNS set to {provider?.Name ?? providerId}";
-        }
-        else
-        {
-            StatusMessage = "Failed to apply DNS settings";
-        }
-        
-        IsApplying = false;
-    }
-}
-
-public partial class DnsProviderViewModel : ObservableObject
-{
-    private readonly DnsProvider _provider;
-    private readonly DnsViewModel _parent;
-
-    public string Id => _provider.Id;
-    public string Name => _provider.Name;
-    public string Description => _provider.Description;
-    public string PrimaryDns => _provider.PrimaryDns;
-    public string SecondaryDns => _provider.SecondaryDns;
-
-    [ObservableProperty] private bool _isActive;
-
-    public DnsProviderViewModel(DnsProvider provider, DnsViewModel parent)
-    {
-        _provider = provider;
-        _parent = parent;
-    }
-
-    [RelayCommand]
-    private async Task ApplyAsync()
-    {
-        await _parent.SetDnsAsync(Id);
-    }
-}
-
-public partial class RestorePointsViewModel : ObservableObject
-{
-    private readonly IRestorePointService _restoreService;
-
-    [ObservableProperty] private ObservableCollection<RestorePoint> _restorePoints = new();
-    [ObservableProperty] private bool _isLoading;
-    [ObservableProperty] private bool _isCreating;
-    [ObservableProperty] private string _newPointName = string.Empty;
-    [ObservableProperty] private string _statusMessage = string.Empty;
-
-    public RestorePointsViewModel()
-    {
-        _restoreService = App.Services.GetRequiredService<IRestorePointService>();
-        _ = LoadRestorePointsAsync();
-    }
-
-    [RelayCommand]
-    private async Task LoadRestorePointsAsync()
-    {
-        IsLoading = true;
-        StatusMessage = "Loading restore points...";
-        
-        var points = await _restoreService.GetRestorePointsAsync();
-        RestorePoints = new ObservableCollection<RestorePoint>(points.OrderByDescending(p => p.CreationTime));
-        
-        StatusMessage = $"Found {points.Count} restore points";
-        IsLoading = false;
-    }
-
-    [RelayCommand]
-    private async Task CreateRestorePointAsync()
-    {
-        if (string.IsNullOrWhiteSpace(NewPointName))
-        {
-            StatusMessage = "Enter a name for the restore point";
-            return;
-        }
-
-        IsCreating = true;
-        StatusMessage = "Creating restore point (this may take a minute)...";
-        
-        var success = await _restoreService.CreateRestorePointAsync(NewPointName);
-        
-        StatusMessage = success ? "Restore point created successfully!" : "Failed to create restore point";
-        NewPointName = string.Empty;
-        IsCreating = false;
-        
-        if (success)
-            await LoadRestorePointsAsync();
-    }
-}
-
-public partial class UtilitiesViewModel : ObservableObject
-{
-    private readonly IUtilitiesService _utilitiesService;
-
-    [ObservableProperty] private ObservableCollection<UtilityAction> _utilities = new();
-    [ObservableProperty] private ObservableCollection<UtilityAction> _filteredUtilities = new();
-    [ObservableProperty] private bool _isRunning;
-    [ObservableProperty] private string _statusMessage = "Select a utility to run";
-    [ObservableProperty] private string _selectedCategory = "all";
-
-    public List<string> Categories { get; } = new() 
-    { 
-        "all", "recommended", "repair", "network", "tools", "power", "quick" 
-    };
-
-    public UtilitiesViewModel()
-    {
-        _utilitiesService = App.Services.GetRequiredService<IUtilitiesService>();
-        
-        foreach (var utility in _utilitiesService.GetUtilities())
-        {
-            Utilities.Add(utility);
-        }
-        
-        FilterUtilities();
-    }
-
-    partial void OnSelectedCategoryChanged(string value) => FilterUtilities();
-
-    private void FilterUtilities()
-    {
-        var filtered = SelectedCategory == "all" 
-            ? Utilities 
-            : new ObservableCollection<UtilityAction>(Utilities.Where(u => u.Category == SelectedCategory));
-        
-        FilteredUtilities = filtered;
-    }
-
-    [RelayCommand]
-    private async Task RunUtilityAsync(string actionId)
-    {
-        var utility = Utilities.FirstOrDefault(u => u.Id == actionId);
-        if (utility == null) return;
-
-        IsRunning = true;
-        StatusMessage = $"Running {utility.Name}...";
-        
-        var (success, output) = await _utilitiesService.RunUtilityAsync(actionId);
-        
-        StatusMessage = output;
-        
-        if (utility.RequiresRestart)
-        {
-            StatusMessage += " (Restart required)";
-        }
-        
-        IsRunning = false;
-    }
-}
-
-public partial class SettingsViewModel : ObservableObject
-{
-    private readonly ISettingsService _settingsService;
-
-    // Theme Settings
-    [ObservableProperty] private bool _isDarkMode = true;
-    [ObservableProperty] private string _selectedAccentColor = "Red";
-    [ObservableProperty] private ObservableCollection<AccentColorOption> _accentColors = new();
-    
-    // General Settings
-    [ObservableProperty] private bool _startWithWindows;
-    [ObservableProperty] private bool _minimizeToTray;
-    [ObservableProperty] private bool _autoDetectOnStartup = true;
-    
-    // About
-    [ObservableProperty] private string _appVersion = "4.0.0";
-    [ObservableProperty] private string _buildDate = "December 2025";
-
-    public SettingsViewModel()
-    {
-        _settingsService = App.Services.GetRequiredService<ISettingsService>();
-        InitializeAccentColors();
-        LoadSettings();
-    }
-
-    private void InitializeAccentColors()
-    {
-        // Add all available accent colors
-        foreach (var colorName in Helpers.ThemeManager.GetAccentColorNames())
-        {
-            var previewColor = Helpers.ThemeManager.GetAccentPreviewColor(colorName);
-            AccentColors.Add(new AccentColorOption
+            Tweaks = _tweakService.GetAllTweaks();
+            foreach (var tweak in Tweaks)
             {
-                Name = colorName,
-                PreviewColor = new System.Windows.Media.SolidColorBrush(previewColor),
-                IsSelected = colorName == "Red" // Default
-            });
+                _tweakService.CheckTweakStatus(tweak);
+            }
+            FilterTweaks();
         }
-    }
 
-    private void LoadSettings()
-    {
-        // Load theme mode (default: dark)
-        IsDarkMode = _settingsService.GetSetting("theme_mode") != "light";
-        
-        // Load accent color (default: Red)
-        var savedAccent = _settingsService.GetSetting("accent_color");
-        SelectedAccentColor = string.IsNullOrEmpty(savedAccent) ? "Red" : savedAccent;
-        
-        // Load other settings
-        StartWithWindows = _settingsService.GetSetting("start_with_windows") == "true";
-        MinimizeToTray = _settingsService.GetSetting("minimize_to_tray") == "true";
-        AutoDetectOnStartup = _settingsService.GetSetting("auto_detect") != "false";
-        
-        // Apply loaded theme immediately
-        ApplyCurrentTheme();
-    }
+        partial void OnSearchTextChanged(string value) => FilterTweaks();
+        partial void OnSelectedCategoryChanged(string value) => FilterTweaks();
 
-    private void ApplyCurrentTheme()
-    {
-        Helpers.ThemeManager.SetThemeMode(IsDarkMode);
-        Helpers.ThemeManager.SetAccentColor(SelectedAccentColor);
-        UpdateAccentColorSelection();
-    }
-
-    private void UpdateAccentColorSelection()
-    {
-        foreach (var color in AccentColors)
+        private void FilterTweaks()
         {
-            color.IsSelected = color.Name == SelectedAccentColor;
+            var filtered = Tweaks.Where(t =>
+                (SelectedCategory == "All" || t.Category == SelectedCategory) &&
+                (string.IsNullOrEmpty(SearchText) ||
+                 t.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                 t.Description.Contains(SearchText, StringComparison.OrdinalIgnoreCase)));
+
+            FilteredTweaks = new ObservableCollection<Tweak>(filtered);
+        }
+
+        [RelayCommand]
+        private void ApplyTweak(Tweak tweak)
+        {
+            _tweakService.ApplyTweak(tweak);
+        }
+
+        [RelayCommand]
+        private void RevertTweak(Tweak tweak)
+        {
+            _tweakService.RevertTweak(tweak);
+        }
+
+        [RelayCommand]
+        private void ApplyAll()
+        {
+            foreach (var tweak in FilteredTweaks)
+            {
+                _tweakService.ApplyTweak(tweak);
+            }
+        }
+
+        [RelayCommand]
+        private void RevertAll()
+        {
+            foreach (var tweak in FilteredTweaks)
+            {
+                _tweakService.RevertTweak(tweak);
+            }
         }
     }
 
-    partial void OnIsDarkModeChanged(bool value)
+    public partial class CleanerViewModel : ObservableObject
     {
-        _settingsService.SetSetting("theme_mode", value ? "dark" : "light");
-        Helpers.ThemeManager.SetThemeMode(value);
+        private readonly CleanerService _cleanerService;
+
+        [ObservableProperty]
+        private ObservableCollection<CleanerCategory> categories = new();
+
+        [ObservableProperty]
+        private ObservableCollection<CleanHistory> history = new();
+
+        [ObservableProperty]
+        private string totalSize = "0 B";
+
+        [ObservableProperty]
+        private int totalFiles = 0;
+
+        [ObservableProperty]
+        private string statusMessage = "Ready to scan";
+
+        public CleanerViewModel()
+        {
+            _cleanerService = new CleanerService();
+            Categories = _cleanerService.GetCategories();
+        }
+
+        [RelayCommand]
+        private async Task Scan()
+        {
+            StatusMessage = "Scanning...";
+            long total = 0;
+            int files = 0;
+
+            foreach (var category in Categories)
+            {
+                var (size, count) = await _cleanerService.ScanCategoryAsync(category);
+                total += size;
+                files += count;
+            }
+
+            TotalSize = FormatSize(total);
+            TotalFiles = files;
+            StatusMessage = $"Scan complete. Found {files} files.";
+        }
+
+        [RelayCommand]
+        private void SelectAll()
+        {
+            foreach (var category in Categories)
+            {
+                category.IsSelected = true;
+            }
+        }
+
+        [RelayCommand]
+        private async Task Clean()
+        {
+            StatusMessage = "Cleaning...";
+            long cleaned = 0;
+
+            foreach (var category in Categories.Where(c => c.IsSelected))
+            {
+                cleaned += await _cleanerService.CleanCategoryAsync(category);
+            }
+
+            History.Insert(0, new CleanHistory { Date = DateTime.Now, FreedBytes = cleaned });
+            StatusMessage = $"Cleaned {FormatSize(cleaned)}";
+            await Scan();
+        }
+
+        private static string FormatSize(long bytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            int order = 0;
+            double size = bytes;
+            while (size >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                size /= 1024;
+            }
+            return $"{size:0.##} {sizes[order]}";
+        }
     }
 
-    partial void OnSelectedAccentColorChanged(string value)
+    public partial class UtilitiesViewModel : ObservableObject
     {
-        if (string.IsNullOrEmpty(value)) return;
-        
-        _settingsService.SetSetting("accent_color", value);
-        Helpers.ThemeManager.SetAccentColor(value);
-        UpdateAccentColorSelection();
-    }
-    
-    partial void OnStartWithWindowsChanged(bool value) => 
-        _settingsService.SetSetting("start_with_windows", value.ToString().ToLower());
-    
-    partial void OnMinimizeToTrayChanged(bool value) => 
-        _settingsService.SetSetting("minimize_to_tray", value.ToString().ToLower());
-    
-    partial void OnAutoDetectOnStartupChanged(bool value) => 
-        _settingsService.SetSetting("auto_detect", value.ToString().ToLower());
+        private readonly UtilitiesService _utilitiesService;
 
-    [RelayCommand]
-    private void SelectAccentColor(string colorName)
+        [ObservableProperty]
+        private ObservableCollection<UtilityItem> utilities = new();
+
+        public UtilitiesViewModel()
+        {
+            _utilitiesService = new UtilitiesService();
+            Utilities = _utilitiesService.GetUtilities();
+        }
+
+        [RelayCommand]
+        private void RunUtility(UtilityItem utility)
+        {
+            utility.Action?.Invoke();
+        }
+
+        [RelayCommand]
+        private void RunChrisTitus()
+        {
+            _utilitiesService.RunChrisTitusUtility();
+        }
+    }
+
+    public partial class DnsViewModel : ObservableObject
     {
-        SelectedAccentColor = colorName;
-    }
-}
+        private readonly DnsService _dnsService;
 
-/// <summary>
-/// Represents an accent color option for the settings UI
-/// </summary>
-public partial class AccentColorOption : ObservableObject
-{
-    public string Name { get; set; } = string.Empty;
-    public System.Windows.Media.SolidColorBrush PreviewColor { get; set; } = new();
-    
-    [ObservableProperty] private bool _isSelected;
+        [ObservableProperty]
+        private ObservableCollection<DnsProvider> providers = new();
+
+        [ObservableProperty]
+        private DnsProvider? selectedProvider;
+
+        public DnsViewModel()
+        {
+            _dnsService = new DnsService();
+            Providers = _dnsService.GetProviders();
+        }
+
+        [RelayCommand]
+        private void ApplyDns()
+        {
+            if (SelectedProvider != null)
+            {
+                _dnsService.SetDns(SelectedProvider);
+            }
+        }
+
+        [RelayCommand]
+        private void ResetDns()
+        {
+            _dnsService.ResetToAutomatic();
+        }
+    }
+
+    public partial class RestorePointsViewModel : ObservableObject
+    {
+        private readonly RestorePointService _restorePointService;
+
+        [ObservableProperty]
+        private ObservableCollection<RestorePoint> restorePoints = new();
+
+        [ObservableProperty]
+        private string newPointName = string.Empty;
+
+        public RestorePointsViewModel()
+        {
+            _restorePointService = new RestorePointService();
+            LoadRestorePoints();
+        }
+
+        [RelayCommand]
+        private void LoadRestorePoints()
+        {
+            RestorePoints = _restorePointService.GetRestorePoints();
+        }
+
+        [RelayCommand]
+        private void CreateRestorePoint()
+        {
+            if (!string.IsNullOrWhiteSpace(NewPointName))
+            {
+                _restorePointService.CreateRestorePoint(NewPointName);
+                NewPointName = string.Empty;
+                LoadRestorePoints();
+            }
+        }
+    }
+
+    public partial class SettingsViewModel : ObservableObject
+    {
+        [ObservableProperty]
+        private bool isDarkMode = true;
+
+        [ObservableProperty]
+        private string selectedAccent = "Red";
+
+        public ObservableCollection<string> AccentColors { get; } = new()
+        {
+            "Red", "Blue", "Green", "Purple", "Pink", "Orange", "Teal"
+        };
+
+        partial void OnIsDarkModeChanged(bool value)
+        {
+            ThemeManager.SetTheme(value, SelectedAccent);
+        }
+
+        partial void OnSelectedAccentChanged(string value)
+        {
+            ThemeManager.SetTheme(IsDarkMode, value);
+        }
+    }
 }

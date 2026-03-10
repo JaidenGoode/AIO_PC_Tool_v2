@@ -1,11 +1,12 @@
 using System.Windows.Controls;
 
-namespace AIO_PC_Tool_v2.Views;
-
-public partial class DashboardPage : Page
+namespace AIO_PC_Tool_v2.Views
 {
-    public DashboardPage()
+    public partial class DashboardPage : Page
     {
-        InitializeComponent();
+        public DashboardPage()
+        {
+            InitializeComponent();
+        }
     }
 }

@@ -1,109 +1,149 @@
-namespace AIO_PC_Tool_v2.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
 
-public class Tweak
+namespace AIO_PC_Tool_v2.Models
 {
-    public int Id { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string Category { get; set; } = string.Empty;
-    public bool IsActive { get; set; }
-    public string? Warning { get; set; }
-    public string? FeatureBreaks { get; set; }
-    public string EnableScript { get; set; } = string.Empty;
-    public string DisableScript { get; set; } = string.Empty;
-    public string DetectScript { get; set; } = string.Empty;
-}
+    public partial class Tweak : ObservableObject
+    {
+        [ObservableProperty]
+        private string id = string.Empty;
 
-public class SystemInfo
-{
-    public CpuInfo Cpu { get; set; } = new();
-    public GpuInfo Gpu { get; set; } = new();
-    public MemoryInfo Memory { get; set; } = new();
-    public StorageInfo Storage { get; set; } = new();
-    public OsInfo Os { get; set; } = new();
-}
+        [ObservableProperty]
+        private string title = string.Empty;
 
-public class CpuInfo
-{
-    public string Model { get; set; } = "Unknown";
-    public int Cores { get; set; }
-    public int Threads { get; set; }
-    public double Speed { get; set; }
-    public double Usage { get; set; }
-    public double Temperature { get; set; }
-}
+        [ObservableProperty]
+        private string description = string.Empty;
 
-public class GpuInfo
-{
-    public string Model { get; set; } = "Unknown";
-    public string Vram { get; set; } = "Unknown";
-    public double Usage { get; set; }
-    public double Temperature { get; set; }
-}
+        [ObservableProperty]
+        private string category = string.Empty;
 
-public class MemoryInfo
-{
-    public string Total { get; set; } = "0 GB";
-    public string Used { get; set; } = "0 GB";
-    public string Available { get; set; } = "0 GB";
-    public string Type { get; set; } = "Unknown";
-    public double UsagePercent { get; set; }
-}
+        [ObservableProperty]
+        private bool isActive;
 
-public class StorageInfo
-{
-    public string PrimaryDisk { get; set; } = "Unknown";
-    public string TotalSpace { get; set; } = "0 GB";
-    public string FreeSpace { get; set; } = "0 GB";
-    public double UsagePercent { get; set; }
-    public double ReadSpeed { get; set; }
-    public double WriteSpeed { get; set; }
-}
+        [ObservableProperty]
+        private string? warning;
 
-public class OsInfo
-{
-    public string Name { get; set; } = "Windows";
-    public string Version { get; set; } = "Unknown";
-    public string Build { get; set; } = "Unknown";
-}
+        [ObservableProperty]
+        private string windowsVersion = "10/11";
 
-public class CleanCategory
-{
-    public string Id { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public List<string> Paths { get; set; } = new();
-    public string? GlobDir { get; set; }
-    public string? GlobPattern { get; set; }
-    public long Size { get; set; }
-    public string SizeHuman { get; set; } = "0 B";
-    public int FileCount { get; set; }
-    public bool IsSelected { get; set; }
-    public bool Found { get; set; }
-}
+        public string RegistryPath { get; set; } = string.Empty;
+        public string RegistryName { get; set; } = string.Empty;
+        public object? OptimizedValue { get; set; }
+        public object? DefaultValue { get; set; }
+    }
 
-public class CleaningHistory
-{
-    public DateTime Date { get; set; }
-    public long Freed { get; set; }
-    public string FreedHuman { get; set; } = "0 B";
-    public int Count { get; set; }
-}
+    public class CleanerCategory : ObservableObject
+    {
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set => SetProperty(ref _isSelected, value);
+        }
 
-public class DnsProvider
-{
-    public string Id { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string PrimaryDns { get; set; } = string.Empty;
-    public string SecondaryDns { get; set; } = string.Empty;
-    public string Icon { get; set; } = string.Empty;
-    public bool IsActive { get; set; }
-}
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public long Size { get; set; }
+        public int FileCount { get; set; }
+        public string SizeHuman => FormatSize(Size);
+        public string[] Paths { get; set; } = Array.Empty<string>();
 
-public class RestorePoint
-{
-    public string Description { get; set; } = string.Empty;
-    public DateTime CreationTime { get; set; }
-    public int SequenceNumber { get; set; }
+        private static string FormatSize(long bytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            int order = 0;
+            double size = bytes;
+            while (size >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                size /= 1024;
+            }
+            return $"{size:0.##} {sizes[order]}";
+        }
+    }
+
+    public class CleanHistory
+    {
+        public DateTime Date { get; set; }
+        public long FreedBytes { get; set; }
+        public string FreedHuman => FormatSize(FreedBytes);
+
+        private static string FormatSize(long bytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            int order = 0;
+            double size = bytes;
+            while (size >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                size /= 1024;
+            }
+            return $"{size:0.##} {sizes[order]}";
+        }
+    }
+
+    public class DnsProvider
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string PrimaryDns { get; set; } = string.Empty;
+        public string SecondaryDns { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
+    }
+
+    public class SystemInfo
+    {
+        public CpuInfo Cpu { get; set; } = new();
+        public RamInfo Ram { get; set; } = new();
+        public GpuInfo Gpu { get; set; } = new();
+        public DiskInfo Disk { get; set; } = new();
+    }
+
+    public class CpuInfo
+    {
+        public string Model { get; set; } = "Unknown";
+        public double Usage { get; set; }
+        public double Temperature { get; set; }
+        public int Cores { get; set; }
+        public int Threads { get; set; }
+    }
+
+    public class RamInfo
+    {
+        public double UsedGb { get; set; }
+        public double TotalGb { get; set; }
+        public double UsagePercent => TotalGb > 0 ? (UsedGb / TotalGb) * 100 : 0;
+    }
+
+    public class GpuInfo
+    {
+        public string Model { get; set; } = "Unknown";
+        public double Usage { get; set; }
+        public double Temperature { get; set; }
+        public double MemoryUsedGb { get; set; }
+        public double MemoryTotalGb { get; set; }
+    }
+
+    public class DiskInfo
+    {
+        public double UsedGb { get; set; }
+        public double TotalGb { get; set; }
+        public double UsagePercent => TotalGb > 0 ? (UsedGb / TotalGb) * 100 : 0;
+    }
+
+    public class RestorePoint
+    {
+        public string Description { get; set; } = string.Empty;
+        public DateTime CreationTime { get; set; }
+        public int SequenceNumber { get; set; }
+    }
+
+    public class UtilityItem
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public Action? Action { get; set; }
+    }
 }

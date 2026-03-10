@@ -14,7 +14,7 @@
     <Company>JGoode</Company>
     <Product>JGoode's AIO PC Tool v2</Product>
     <Description>Professional Windows optimization, privacy, and performance tool with 80+ tweaks, real-time hardware monitoring, system cleaner, DNS manager, and utilities.</Description>
-    <Copyright>Copyright © 2026 JaidenGoode</Copyright>
+    <Copyright>Copyright 2024 JaidenGoode</Copyright>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 

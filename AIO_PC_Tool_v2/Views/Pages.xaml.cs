@@ -1,51 +1,52 @@
 using System.Windows.Controls;
 
-namespace AIO_PC_Tool_v2.Views;
-
-public partial class TweaksPage : Page
+namespace AIO_PC_Tool_v2.Views
 {
-    public TweaksPage()
+    public partial class CleanerPage : Page
     {
-        InitializeComponent();
+        public CleanerPage()
+        {
+            InitializeComponent();
+        }
     }
-}
 
-public partial class CleanerPage : Page
-{
-    public CleanerPage()
+    public partial class TweaksPage : Page
     {
-        InitializeComponent();
+        public TweaksPage()
+        {
+            InitializeComponent();
+        }
     }
-}
 
-public partial class DnsPage : Page
-{
-    public DnsPage()
+    public partial class DnsPage : Page
     {
-        InitializeComponent();
+        public DnsPage()
+        {
+            InitializeComponent();
+        }
     }
-}
 
-public partial class RestorePointsPage : Page
-{
-    public RestorePointsPage()
+    public partial class RestorePointsPage : Page
     {
-        InitializeComponent();
+        public RestorePointsPage()
+        {
+            InitializeComponent();
+        }
     }
-}
 
-public partial class UtilitiesPage : Page
-{
-    public UtilitiesPage()
+    public partial class UtilitiesPage : Page
     {
-        InitializeComponent();
+        public UtilitiesPage()
+        {
+            InitializeComponent();
+        }
     }
-}
 
-public partial class SettingsPage : Page
-{
-    public SettingsPage()
+    public partial class SettingsPage : Page
     {
-        InitializeComponent();
+        public SettingsPage()
+        {
+            InitializeComponent();
+        }
     }
 }
